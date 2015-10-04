@@ -6,6 +6,7 @@
 using namespace Bial;
 using namespace std;
 
+#define OFFSET 0.0001
 void TestGeometrics::testVector3D( ) {
   const Vector3D v1;
   QCOMPARE( v1.x, 0.0 );
@@ -15,20 +16,20 @@ void TestGeometrics::testVector3D( ) {
   QCOMPARE( v2.x, 1.0 );
   QCOMPARE( v2.y, 2.0 );
   QCOMPARE( v2.z, 3.0 );
-  const Vector3D v3( 4.65f, 5.45f, 6.54f );
+  const Vector3D v3( 4.65, 5.45, 6.54 );
   Vector3D v4 = v1 + v2 + v3;
-  QCOMPARE( v4.x, 5.65f );
-  QCOMPARE( v4.y, 7.45f );
-  QCOMPARE( v4.z, 9.54f );
+  QCOMPARE( v4.x, 5.65 );
+  QCOMPARE( v4.y, 7.45 );
+  QCOMPARE( v4.z, 9.54 );
   QVERIFY_EXCEPTION_THROWN( Vector3D( 0.0 / 0.0, 0, 0 ), runtime_error );
   v4 += v2;
-  QCOMPARE( v4.x, 6.65f );
-  QCOMPARE( v4.y, 9.45f );
-  QCOMPARE( v4.z, 12.54f );
+  QCOMPARE( v4.x, 6.65 );
+  QCOMPARE( v4.y, 9.45 );
+  QCOMPARE( v4.z, 12.54 );
   v4 -= v2;
-  QCOMPARE( v4.x, 5.65f );
-  QCOMPARE( v4.y, 7.45f );
-  QCOMPARE( v4.z, 9.54f );
+  QCOMPARE( v4.x, 5.65 );
+  QCOMPARE( v4.y, 7.45 );
+  QCOMPARE( v4.z, 9.54 );
   v4 = v4 - v3;
   QCOMPARE( v4.x, 1.0 );
   QCOMPARE( v4.y, 2.0 );
@@ -37,11 +38,11 @@ void TestGeometrics::testVector3D( ) {
   QCOMPARE( v4.x, 2.0 );
   QCOMPARE( v4.y, 4.0 );
   QCOMPARE( v4.z, 6.0 );
-  v4 *= 1.2f;
-  QCOMPARE( v4.x, 2.4f );
-  QCOMPARE( v4.y, 4.8f );
-  QCOMPARE( v4.z, 7.2f );
-  v4 /= 1.2f;
+  v4 *= 1.2;
+  QCOMPARE( v4.x, 2.4 );
+  QCOMPARE( v4.y, 4.8 );
+  QCOMPARE( v4.z, 7.2 );
+  v4 /= 1.2;
   QCOMPARE( v4.x, 2.0 );
   QCOMPARE( v4.y, 4.0 );
   QCOMPARE( v4.z, 6.0 );
@@ -56,19 +57,19 @@ void TestGeometrics::testVector3D( ) {
   QCOMPARE( Dot( v2, -v2 ), -14.0 );
   QCOMPARE( AbsDot( v2, -v2 ), 14.0 );
   Vector3D cross = Cross( v2, v3 );
-  QCOMPARE( cross.x, -3.27f );
-  QCOMPARE( cross.y, 7.41f );
-  QCOMPARE( cross.z, -3.85f );
+  QCOMPARE( cross.x, -3.27 );
+  QCOMPARE( cross.y, 7.41 );
+  QCOMPARE( cross.z, -3.85 );
   Vector3D v5( 1.0, 1.0, 1.0 );
   Vector3D norm = v5.Normalized( );
-  QCOMPARE( norm.x, 0.57735f );
-  QCOMPARE( norm.y, 0.57735f );
-  QCOMPARE( norm.z, 0.57735f );
+  QVERIFY( std::abs( norm.x - 0.57735 ) < OFFSET);
+  QVERIFY( std::abs( norm.y - 0.57735 ) < OFFSET);
+  QVERIFY( std::abs( norm.z - 0.57735 ) < OFFSET);
   Vector3D norm2 = Vector3D( 3, 0, 0 ).Normalized( );
   QCOMPARE( norm2, Vector3D( 1, 0, 0 ) );
   QCOMPARE( v1.Length( ), 0.0 );
-  QCOMPARE( v2.Length( ), 3.74166f );
-  QCOMPARE( v2.LengthSquared( ), 14.0 );
+  QVERIFY( std::abs( v2.Length( ) - 3.74166 ) < 0.001);
+  QVERIFY( std::abs( v2.LengthSquared( ) - 14.0 ) < 0.001);
 }
 
 
@@ -77,11 +78,11 @@ void TestGeometrics::testCoordinateSystem( ) {
   v1 = v1.Normalized( );
   CoordinateSystem( v1, &v2, &v3 );
   QCOMPARE( v2.x, 0.0 );
-  QCOMPARE( v2.y, 0.83205f );
-  QCOMPARE( v2.z, -0.5547f );
-  QCOMPARE( v3.x, -0.963624f );
-  QCOMPARE( v3.y, 0.14825f );
-  QCOMPARE( v3.z, 0.222375f );
+  QVERIFY( std::abs( v2.y - (0.83205  ) ) < OFFSET);
+  QVERIFY( std::abs( v2.z - (-0.5547  ) ) < OFFSET);
+  QVERIFY( std::abs( v3.x - (-0.963624) ) < OFFSET);
+  QVERIFY( std::abs( v3.y - (0.14825  ) ) < OFFSET);
+  QVERIFY( std::abs( v3.z - (0.222375 ) ) < OFFSET);
 }
 
 void TestGeometrics::testPoint3D( ) {
@@ -130,20 +131,20 @@ void TestGeometrics::testNormal( ) {
   QCOMPARE( n2.x, 1.0 );
   QCOMPARE( n2.y, 2.0 );
   QCOMPARE( n2.z, 3.0 );
-  const Normal n3( 4.65f, 5.45f, 6.54f );
+  const Normal n3( 4.65, 5.45, 6.54 );
   Normal n4 = n1 + n2 + n3;
-  QCOMPARE( n4.x, 5.65f );
-  QCOMPARE( n4.y, 7.45f );
-  QCOMPARE( n4.z, 9.54f );
+  QCOMPARE( n4.x, 5.65 );
+  QCOMPARE( n4.y, 7.45 );
+  QCOMPARE( n4.z, 9.54 );
   QVERIFY_EXCEPTION_THROWN( Normal( 0.0 / 0.0, 0, 0 ), runtime_error );
   n4 += n2;
-  QCOMPARE( n4.x, 6.65f );
-  QCOMPARE( n4.y, 9.45f );
-  QCOMPARE( n4.z, 12.54f );
+  QCOMPARE( n4.x, 6.65 );
+  QCOMPARE( n4.y, 9.45 );
+  QCOMPARE( n4.z, 12.54 );
   n4 -= n2;
-  QCOMPARE( n4.x, 5.65f );
-  QCOMPARE( n4.y, 7.45f );
-  QCOMPARE( n4.z, 9.54f );
+  QCOMPARE( n4.x, 5.65 );
+  QCOMPARE( n4.y, 7.45 );
+  QCOMPARE( n4.z, 9.54 );
   n4 = n4 - n3;
   QCOMPARE( n4.x, 1.0 );
   QCOMPARE( n4.y, 2.0 );
@@ -152,11 +153,11 @@ void TestGeometrics::testNormal( ) {
   QCOMPARE( n4.x, 2.0 );
   QCOMPARE( n4.y, 4.0 );
   QCOMPARE( n4.z, 6.0 );
-  n4 *= 1.2f;
-  QCOMPARE( n4.x, 2.4f );
-  QCOMPARE( n4.y, 4.8f );
-  QCOMPARE( n4.z, 7.2f );
-  n4 /= 1.2f;
+  n4 *= 1.2;
+  QCOMPARE( n4.x, 2.4 );
+  QCOMPARE( n4.y, 4.8 );
+  QCOMPARE( n4.z, 7.2 );
+  n4 /= 1.2;
   QCOMPARE( n4.x, 2.0 );
   QCOMPARE( n4.y, 4.0 );
   QCOMPARE( n4.z, 6.0 );
@@ -172,11 +173,11 @@ void TestGeometrics::testNormal( ) {
   QCOMPARE( AbsDot( n2, -n2 ), 14.0 );
   Normal v5( 1.0, 1.0, 1.0 );
   Normal norm = v5.Normalized( );
-  QCOMPARE( norm.x, 0.57735f );
-  QCOMPARE( norm.y, 0.57735f );
-  QCOMPARE( norm.z, 0.57735f );
+  QVERIFY( std::abs( norm.x - 0.57735) < OFFSET );
+  QVERIFY( std::abs( norm.y - 0.57735) < OFFSET );
+  QVERIFY( std::abs( norm.z - 0.57735) < OFFSET );
   QCOMPARE( n1.Length( ), 0.0 );
-  QCOMPARE( n2.Length( ), 3.74166f );
+  QCOMPARE( n2.Length( ), 3.74166 );
   QCOMPARE( n2.LengthSquared( ), 14.0 );
   const Vector3D vec( 1.0, 2.0, 3.0 );
   QCOMPARE( Dot( n2, -vec ), -14.0 );
@@ -261,7 +262,7 @@ void TestGeometrics::testTransform3D( ) {
   t1.reset( );
   QCOMPARE( t1.getAffineMatrix( ).at( 3, 1 ), 0.0 );
   QCOMPARE( t1.getInverseMatrix( ).at( 3, 1 ), 0.0 );
-  QVERIFY_EXCEPTION_THROWN( t1.Scale( 0, 0, 0 ), logic_error );
+  QVERIFY_EXCEPTION_THROWN( t1.Scale( 0.0, 0.0, 0.0 ), logic_error );
   t1.reset( );
   QVERIFY( !t1.HasScale( ) );
   t1.Scale( 2.0, 4.0, 8.0 );
@@ -308,8 +309,8 @@ void TestGeometrics::testImageTransform( ) {
   time.start( );
 
   {
-    Transform3D axialTransform;
-    axialTransform.Rotate( 90.0, Transform3D::X ).Rotate( 90.0, Transform3D::Y );
+    FastTransform axialTransform;
+    axialTransform.Rotate( 90.0, FastTransform::X ).Rotate( 90.0, FastTransform::Y );
     Point3D start, end( img.size( 0 ), img.size( 1 ), img.size( 2 ) );
     axialTransform( start, &start );
     axialTransform( end, &end );
@@ -330,8 +331,8 @@ void TestGeometrics::testImageTransform( ) {
     axial.Write( "dat/axial.pgm" );
     QVERIFY2( TestHelper::CompareImages( "dat/axial.pgm", "res/axial.pgm" ), "Image do not match to template." );
   } {
-    Transform3D coronalTransform;
-    coronalTransform.Rotate( 180.0, Transform3D::Z ).Rotate( 90.0, Transform3D::Y );
+    FastTransform coronalTransform;
+    coronalTransform.Rotate( 180.0, FastTransform::Z ).Rotate( 90.0, FastTransform::Y );
     Point3D start, end( img.size( 0 ), img.size( 1 ), img.size( 2 ) );
     coronalTransform( start, &start );
     coronalTransform( end, &end );
@@ -352,8 +353,8 @@ void TestGeometrics::testImageTransform( ) {
     coronal.Write( "dat/coronal.pgm" );
     QVERIFY2( TestHelper::CompareImages( "dat/coronal.pgm", "res/coronal.pgm" ), "Image do not match to template." );
   } {
-    Transform3D sagittalTransform;
-    sagittalTransform.Rotate( 180.0, Transform3D::Z );
+    FastTransform sagittalTransform;
+    sagittalTransform.Rotate( 180.0, FastTransform::Z );
     Point3D start, end( img.size( 0 ), img.size( 1 ), img.size( 2 ) );
     sagittalTransform( start, &start );
     sagittalTransform( end, &end );

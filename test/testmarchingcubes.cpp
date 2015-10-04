@@ -10,8 +10,8 @@ using namespace Bial;
 void TestMarchingCubes::testMarchingCube( ) {
   QTime time;
   time.start( );
-  // Image<int> img = Geometrics::Scale(Image<int>::Read("res/0.nii.gz"),0.5,true);
-  Image< int > img( "res/0.nii.gz" );
+  Image<int> img = Geometrics::Scale(Image<int>::Read("res/0.nii.gz"),0.25,true);
+//  Image< int > img( "res/0.nii.gz" );
 
   TriangleMesh *mesh = MarchingCubes::exec( img, 50.f );
 
@@ -32,7 +32,7 @@ void TestMarchingCubes::testPolygonize( ) {
   }
   cell.val[ 2 ] = 0.f;
   cell.val[ 3 ] = 0.f;
-  cell.calcIdx( 0.5f );
+  cell.calcIdx( 0.5 );
   COMMENT("Teste",0)
   QCOMPARE( cell.idx, (uchar)12 );
   cell.printIdx( );
@@ -41,13 +41,13 @@ void TestMarchingCubes::testPolygonize( ) {
   MarchingCubes::printTris( cell.idx );
 
   std::array< Vector3D, 12 > vertexList;
-  MarchingCubes::getVertexList( vertexList, cell, 0.5f );
+  MarchingCubes::getVertexList( vertexList, cell, 0.5 );
   MarchingCubes::printVertexList( vertexList );
 
   Vector< size_t > tris;
   Vector< Point3D > vertices;
   Vector< Normal > normals;
-  std::cout << "Tris = " << MarchingCubes::Polygonize( cell, 0.5f, tris, vertices, normals ) << std::endl;
+  std::cout << "Tris = " << MarchingCubes::Polygonize( cell, 0.5, tris, vertices, normals ) << std::endl;
   std::shared_ptr< TriangleMesh > mesh( new TriangleMesh( new Transform3D( ), new Transform3D( ),
                                                           false, tris.size( ) / 3,
                                                           vertices.size( ), &tris[ 0 ], &vertices[ 0 ],
@@ -58,12 +58,12 @@ void TestMarchingCubes::testPolygonize( ) {
 // mesh->ExportSTLA(std::cout);
 
   mesh->ExportSTLA( "/tmp/marching.stl" );
-  
+
   std::cout << "Vertices  = " << vertices << std::endl;
   std::cout << "Triangles = " << tris << std::endl;
-  QProcess view;
-  view.start( "glc_player", QStringList( ) << "/tmp/marching.stl" );
-  view.waitForFinished( -1 );
+//  QProcess view;
+//  view.start( "glc_player", QStringList( ) << "/tmp/marching.stl" );
+//  view.waitForFinished( -1 );
 }
 
 void TestMarchingCubes::testBoxAdj( ) {

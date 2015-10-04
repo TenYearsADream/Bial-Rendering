@@ -1,19 +1,4 @@
-QT += testlib
-TARGET = Bial_Render
-CONFIG += console
+TEMPLATE = subdirs
+CONFIG+=ordered
+SUBDIRS = test
 
-include(../bial/bial.pri)
-
-INCLUDEPATH += inc
-
-
-SOURCES += \
-    main.cpp \
-    tst/testgeometrics.cpp \
-    tst/testmarchingcubes.cpp \
-    tst/testdraw.cpp
-
-HEADERS += \
-    tst/testgeometrics.h \
-    tst/testmarchingcubes.h \
-    tst/testdraw.h

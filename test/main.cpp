@@ -1,11 +1,16 @@
 #include <QtTest>
 
-#include "tst/testdraw.h"
-#include "tst/testgeometrics.h"
-#include "tst/testmarchingcubes.h"
+#include "testdraw.h"
+#include "testgeometrics.h"
+#include "testmarchingcubes.h"
 using namespace std;
 
 int main( int argc, char **argv ) {
+  QFileInfo testPath(QDir::current().filePath("res"));
+  if( !testPath.exists() || !testPath.isDir()) {
+    throw std::runtime_error("Test files path not found!");
+  }
+
   TestGeometrics testGeometrics;
   TestDraw testDraw;
   TestMarchingCubes testMarch;
