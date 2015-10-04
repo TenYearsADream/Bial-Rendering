@@ -17,9 +17,11 @@ public:
 private:
   Ui::MainWindow *ui;
 
-  // QWidget interface
+  /* QWidget interface */
 protected:
-  void keyPressEvent(QKeyEvent *);
+  void keyPressEvent( QKeyEvent* );
+private slots:
+  void on_actionOpen_files_triggered( );
 };
 
 #endif /* MAINWINDOW_H */

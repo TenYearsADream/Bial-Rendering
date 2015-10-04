@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QFileDialog>
 #include <QKeyEvent>
 
 MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::MainWindow ) {
@@ -19,4 +20,8 @@ void MainWindow::keyPressEvent( QKeyEvent *e ) {
   else {
     QWidget::keyPressEvent( e );
   }
+}
+
+void MainWindow::on_actionOpen_files_triggered( ) {
+  QString fileName = QFileDialog::getOpenFileName(this, "Open STL files.", QDir::homePath(), tr("STL files (*.stl)") );
 }

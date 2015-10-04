@@ -12,7 +12,9 @@ class STLViewer : public QOpenGLWidget {
 
   Bial::TriangleMesh * mesh;
   GLdouble * verts;
+  GLdouble * norms;
   GLuint * tris;
+  float boundings[3];
 public:
   explicit STLViewer(QWidget * parent = 0 );
 protected:

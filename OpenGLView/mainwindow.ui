@@ -32,6 +32,13 @@
      <height>19</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuOpen_file">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionOpen_files"/>
+   </widget>
+   <addaction name="menuOpen_file"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <property name="allowedAreas">
@@ -45,6 +52,14 @@
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionOpen_files">
+   <property name="text">
+    <string>Open files</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
