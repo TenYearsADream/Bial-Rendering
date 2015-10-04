@@ -11,12 +11,18 @@ class STLViewer : public QOpenGLWidget {
   Q_OBJECT
 
   Bial::TriangleMesh * mesh;
+  GLdouble * verts;
+  GLuint * tris;
 public:
   explicit STLViewer(QWidget * parent = 0 );
 protected:
   void initializeGL();
   void resizeGL(int w, int h);
   void paintGL();
+
+  // QWidget interface
+protected:
+  void keyPressEvent(QKeyEvent *evt);
 };
 
 #endif /* STLVIEWER_H */
