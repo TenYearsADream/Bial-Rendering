@@ -24,11 +24,12 @@ class STLViewer : public QOpenGLWidget {
 public:
   explicit STLViewer( QWidget *parent = 0 );
   void LoadStl(QString stlFile);
-  void resetTransform();
 protected:
+  void resetTransform();
   void initializeGL( );
   void resizeGL( int w, int h );
   void paintGL( );
+  void clear();
 
   /* QWidget interface */
 protected:

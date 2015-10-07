@@ -18,6 +18,21 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <property name="spacing">
+     <number>0</number>
+    </property>
     <item row="0" column="0">
      <widget class="STLViewer" name="openGLWidget"/>
     </item>
@@ -40,18 +55,6 @@
    </widget>
    <addaction name="menuOpen_file"/>
   </widget>
-  <widget class="QToolBar" name="mainToolBar">
-   <property name="allowedAreas">
-    <set>Qt::NoToolBarArea</set>
-   </property>
-   <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-  </widget>
-  <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen_files">
    <property name="text">
     <string>Open files</string>

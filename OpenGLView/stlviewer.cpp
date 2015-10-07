@@ -6,9 +6,12 @@
 #include <QOpenGLFunctions>
 
 STLViewer::STLViewer( QWidget *parent ) : QOpenGLWidget( parent ) {
+  mesh = nullptr;
+  verts = nullptr;
+  norms = nullptr;
+  tris = nullptr;
   setFocus( );
   setFocusPolicy( Qt::StrongFocus );
-
   QStringList args = QApplication::arguments( );
   if( args.size( ) == 2 ) {
     LoadStl( args.at( 1 ) );
@@ -16,6 +19,7 @@ STLViewer::STLViewer( QWidget *parent ) : QOpenGLWidget( parent ) {
 }
 
 void STLViewer::LoadStl( QString stlFile ) {
+  clear();
   resetTransform( );
   COMMENT( "Loading stl file: " << stlFile.toStdString( ), 0 );
   mesh = Bial::TriangleMesh::ReadSTLB( stlFile.trimmed( ).toStdString( ) );
@@ -23,7 +27,6 @@ void STLViewer::LoadStl( QString stlFile ) {
   size_t *vertexIndex = mesh->getVertexIndex( );
   Bial::Point3D *p = mesh->getP( );
   Bial::Normal *n = mesh->getN( );
-
   verts = new GLdouble[ mesh->getNverts( ) * 3 ];
   tris = new GLuint[ mesh->getNtris( ) * 3 ];
   for( size_t vtx = 0; vtx < ( mesh->getNtris( ) * 3 ); ++vtx ) {
@@ -123,6 +126,25 @@ void STLViewer::paintGL( ) {
   glEnd( );
 
   glPopMatrix( );
+}
+
+void STLViewer::clear( ) {
+  if( mesh ) {
+    delete mesh;
+  }
+  if( verts ) {
+    delete[] verts;
+  }
+  if( norms ) {
+    delete[] norms;
+  }
+  if( tris ) {
+    delete[] tris;
+  }
+  mesh = nullptr;
+  verts = nullptr;
+  norms = nullptr;
+  tris = nullptr;
 }
 
 
