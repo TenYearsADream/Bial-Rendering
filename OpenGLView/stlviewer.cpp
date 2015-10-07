@@ -5,9 +5,6 @@
 #include <QKeyEvent>
 #include <QOpenGLFunctions>
 
-
-int rotateX = 0, rotateY = 0, rotateZ = 0; /* rotation amounts about axes, controlled by keyboard */
-
 STLViewer::STLViewer( QWidget *parent ) : QOpenGLWidget( parent ) {
   QStringList args = QApplication::arguments( );
   if( args.size( ) == 2 ) {
@@ -52,8 +49,8 @@ STLViewer::STLViewer( QWidget *parent ) : QOpenGLWidget( parent ) {
     boundings[ 2 ] = zs;
 
   }
-  setFocus();
-  setFocusPolicy(Qt::StrongFocus);
+  setFocus( );
+  setFocusPolicy( Qt::StrongFocus );
 }
 
 void STLViewer::initializeGL( ) {
@@ -69,7 +66,7 @@ void STLViewer::initializeGL( ) {
 void STLViewer::resizeGL( int w, int h ) {
   glViewport( 0, 0, w, h );
   glMatrixMode( GL_PROJECTION );
-  glLoadIdentity();
+  glLoadIdentity( );
   gluPerspective( 60, ( float ) w / h, .01, 2.0 );
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity( );
@@ -84,7 +81,7 @@ void STLViewer::paintGL( ) {
   glLoadIdentity( ); /* Set up modelview transform, first cube. */
   glPushMatrix( );
   glTranslated( 0, 0, -1.5 );
-
+  glScaled( zoom, zoom, zoom );
   glScaled( 1.0 / boundings[ 0 ], 1.0 / boundings[ 1 ], 1.0 / boundings[ 2 ] );
   glRotatef( rotateZ, 0, 0, 1 ); /* Apply rotations. */
   glRotatef( rotateY, 0, 1, 0 );
@@ -144,5 +141,54 @@ void STLViewer::keyPressEvent( QKeyEvent *evt ) {
       rotateX = rotateY = rotateZ = 0;
       break;
   }
+  update( );
+}
+
+
+void STLViewer::mousePressEvent( QMouseEvent *evt ) {
+  if( evt->button( ) == Qt::LeftButton ) {
+    dragging = true;
+    lastPoint = evt->pos( );
+  }
+  evt->accept( );
+}
+
+void STLViewer::mouseReleaseEvent( QMouseEvent *evt ) {
+  if( evt->button( ) == Qt::LeftButton ) {
+    dragging = false;
+    QPoint diff = evt->pos( ) - lastPoint;
+    rotateX += diff.y( );
+    rotateY += diff.x( );
+    lastPoint = evt->pos( );
+  }
+  evt->accept( );
+}
+
+void STLViewer::mouseMoveEvent( QMouseEvent *evt ) {
+  if( dragging ) {
+    QPoint diff = evt->pos( ) - lastPoint;
+    rotateX += diff.y( );
+    rotateY += diff.x( );
+    lastPoint = evt->pos( );
+  }
+  evt->accept( );
+  update( );
+}
+
+void STLViewer::wheelEvent( QWheelEvent *evt ) {
+  QPoint numDegrees = evt->angleDelta( ) / 8;
+  if( !numDegrees.isNull( ) ) {
+    QPoint numSteps = numDegrees / 15;
+    zoom += 0.1 * numSteps.ry( );
+  }
+  zoom = std::max(1.0, zoom);
+  evt->accept( );
+  update( );
+}
+
+void STLViewer::mouseDoubleClickEvent( QMouseEvent *evt ) {
+  rotateX = rotateY = rotateZ = 0;
+  zoom = 0.0;
+  evt->accept( );
   update( );
 }
