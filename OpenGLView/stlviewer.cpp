@@ -52,7 +52,8 @@ STLViewer::STLViewer( QWidget *parent ) : QOpenGLWidget( parent ) {
     boundings[ 2 ] = zs;
 
   }
-  setFocusPolicy( Qt::ClickFocus );
+  setFocus();
+  setFocusPolicy(Qt::StrongFocus);
 }
 
 void STLViewer::initializeGL( ) {
@@ -67,8 +68,8 @@ void STLViewer::initializeGL( ) {
 
 void STLViewer::resizeGL( int w, int h ) {
   glViewport( 0, 0, w, h );
-
   glMatrixMode( GL_PROJECTION );
+  glLoadIdentity();
   gluPerspective( 60, ( float ) w / h, .01, 2.0 );
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity( );
@@ -81,7 +82,7 @@ void STLViewer::paintGL( ) {
   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
   glLoadIdentity( ); /* Set up modelview transform, first cube. */
-  glPushMatrix();
+  glPushMatrix( );
   glTranslated( 0, 0, -1.5 );
 
   glScaled( 1.0 / boundings[ 0 ], 1.0 / boundings[ 1 ], 1.0 / boundings[ 2 ] );
