@@ -23,6 +23,8 @@ class STLViewer : public QOpenGLWidget {
   QPoint lastPoint;
 public:
   explicit STLViewer( QWidget *parent = 0 );
+  void LoadStl(QString stlFile);
+  void resetTransform();
 protected:
   void initializeGL( );
   void resizeGL( int w, int h );

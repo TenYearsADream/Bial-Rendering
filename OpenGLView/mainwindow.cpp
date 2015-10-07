@@ -25,4 +25,5 @@ void MainWindow::keyPressEvent( QKeyEvent *e ) {
 void MainWindow::on_actionOpen_files_triggered( ) {
   QString fileName =
     QFileDialog::getOpenFileName( this, "Open STL files.", QDir::homePath( ), tr( "STL files (*.stl)" ) );
+  ui->openGLWidget->LoadStl( fileName );
 }
