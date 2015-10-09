@@ -10,8 +10,8 @@ using namespace Bial;
 void TestMarchingCubes::testMarchingCube( ) {
   QTime time;
   time.start( );
-  Image<int> img = Geometrics::Scale(Image<int>::Read("res/0.nii.gz"),0.25,true);
-//  Image< int > img( "res/0.nii.gz" );
+  Image<int> img = Geometrics::Scale(File::Read<int>("res/0.nii.gz"),0.25,true);
+//  Image< int > img = File::Read<int>( "res/0.nii.gz" );
 
   TriangleMesh *mesh = MarchingCubes::exec( img, 50.f );
 

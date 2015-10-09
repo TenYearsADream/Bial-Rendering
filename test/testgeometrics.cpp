@@ -1,7 +1,7 @@
 #include "testgeometrics.h"
 #include <Common.hpp>
 #include <Geometrics.hpp>
-#include <TestHelper.hpp>
+#include <Test.hpp>
 
 using namespace Bial;
 using namespace std;
@@ -62,14 +62,14 @@ void TestGeometrics::testVector3D( ) {
   QCOMPARE( cross.z, -3.85 );
   Vector3D v5( 1.0, 1.0, 1.0 );
   Vector3D norm = v5.Normalized( );
-  QVERIFY( std::abs( norm.x - 0.57735 ) < OFFSET);
-  QVERIFY( std::abs( norm.y - 0.57735 ) < OFFSET);
-  QVERIFY( std::abs( norm.z - 0.57735 ) < OFFSET);
+  QVERIFY( std::abs( norm.x - 0.57735 ) < OFFSET );
+  QVERIFY( std::abs( norm.y - 0.57735 ) < OFFSET );
+  QVERIFY( std::abs( norm.z - 0.57735 ) < OFFSET );
   Vector3D norm2 = Vector3D( 3, 0, 0 ).Normalized( );
   QCOMPARE( norm2, Vector3D( 1, 0, 0 ) );
   QCOMPARE( v1.Length( ), 0.0 );
-  QVERIFY( std::abs( v2.Length( ) - 3.74166 ) < 0.001);
-  QVERIFY( std::abs( v2.LengthSquared( ) - 14.0 ) < 0.001);
+  QVERIFY( std::abs( v2.Length( ) - 3.74166 ) < 0.001 );
+  QVERIFY( std::abs( v2.LengthSquared( ) - 14.0 ) < 0.001 );
 }
 
 
@@ -78,11 +78,11 @@ void TestGeometrics::testCoordinateSystem( ) {
   v1 = v1.Normalized( );
   CoordinateSystem( v1, &v2, &v3 );
   QCOMPARE( v2.x, 0.0 );
-  QVERIFY( std::abs( v2.y - (0.83205  ) ) < OFFSET);
-  QVERIFY( std::abs( v2.z - (-0.5547  ) ) < OFFSET);
-  QVERIFY( std::abs( v3.x - (-0.963624) ) < OFFSET);
-  QVERIFY( std::abs( v3.y - (0.14825  ) ) < OFFSET);
-  QVERIFY( std::abs( v3.z - (0.222375 ) ) < OFFSET);
+  QVERIFY( std::abs( v2.y - ( 0.83205 ) ) < OFFSET );
+  QVERIFY( std::abs( v2.z - ( -0.5547 ) ) < OFFSET );
+  QVERIFY( std::abs( v3.x - ( -0.963624 ) ) < OFFSET );
+  QVERIFY( std::abs( v3.y - ( 0.14825 ) ) < OFFSET );
+  QVERIFY( std::abs( v3.z - ( 0.222375 ) ) < OFFSET );
 }
 
 void TestGeometrics::testPoint3D( ) {
@@ -173,11 +173,11 @@ void TestGeometrics::testNormal( ) {
   QCOMPARE( AbsDot( n2, -n2 ), 14.0 );
   Normal v5( 1.0, 1.0, 1.0 );
   Normal norm = v5.Normalized( );
-  QVERIFY( std::abs( norm.x - 0.57735) < OFFSET );
-  QVERIFY( std::abs( norm.y - 0.57735) < OFFSET );
-  QVERIFY( std::abs( norm.z - 0.57735) < OFFSET );
+  QVERIFY( std::abs( norm.x - 0.57735 ) < OFFSET );
+  QVERIFY( std::abs( norm.y - 0.57735 ) < OFFSET );
+  QVERIFY( std::abs( norm.z - 0.57735 ) < OFFSET );
   QCOMPARE( n1.Length( ), 0.0 );
-  QCOMPARE( n2.Length( ), 3.74166 );
+  QVERIFY( std::abs( n2.Length( ) - 3.74166 ) < OFFSET );
   QCOMPARE( n2.LengthSquared( ), 14.0 );
   const Vector3D vec( 1.0, 2.0, 3.0 );
   QCOMPARE( Dot( n2, -vec ), -14.0 );
@@ -262,7 +262,7 @@ void TestGeometrics::testTransform3D( ) {
   t1.reset( );
   QCOMPARE( t1.getAffineMatrix( ).at( 3, 1 ), 0.0 );
   QCOMPARE( t1.getInverseMatrix( ).at( 3, 1 ), 0.0 );
-  QVERIFY_EXCEPTION_THROWN( t1.Scale( 0.0, 0.0, 0.0 ), logic_error );
+  QVERIFY_EXCEPTION_THROWN( t1.Scale( 0.0, 0.0, 0.0 ), std::logic_error );
   t1.reset( );
   QVERIFY( !t1.HasScale( ) );
   t1.Scale( 2.0, 4.0, 8.0 );
@@ -290,7 +290,7 @@ void TestGeometrics::testTransform3D( ) {
 }
 
 void TestGeometrics::testImageTransform( ) {
-  Image< int > img( "res/0.nii.gz" );
+  Image< int > img = File::Read< int >( "res/0.nii.gz" );
   /* Getting orientation string from file */
 /*
  *  const NiftiHeader nifti("res/0.nii.gz");
@@ -328,8 +328,8 @@ void TestGeometrics::testImageTransform( ) {
         }
       }
     }
-    axial.Write( "dat/axial.pgm" );
-    QVERIFY2( TestHelper::CompareImages( "dat/axial.pgm", "res/axial.pgm" ), "Image do not match to template." );
+    File::Write( axial, "dat/axial.pgm" );
+    QVERIFY2( Test::EqualImages( "dat/axial.pgm", "res/axial.pgm" ), "Image do not match to template." );
   } {
     FastTransform coronalTransform;
     coronalTransform.Rotate( 180.0, FastTransform::Z ).Rotate( 90.0, FastTransform::Y );
@@ -350,8 +350,8 @@ void TestGeometrics::testImageTransform( ) {
         }
       }
     }
-    coronal.Write( "dat/coronal.pgm" );
-    QVERIFY2( TestHelper::CompareImages( "dat/coronal.pgm", "res/coronal.pgm" ), "Image do not match to template." );
+    File::Write( coronal, "dat/coronal.pgm" );
+    QVERIFY2( Test::EqualImages( "dat/coronal.pgm", "res/coronal.pgm" ), "Image do not match to template." );
   } {
     FastTransform sagittalTransform;
     sagittalTransform.Rotate( 180.0, FastTransform::Z );
@@ -372,15 +372,15 @@ void TestGeometrics::testImageTransform( ) {
         }
       }
     }
-    sagittal.Write( "dat/sagittal.pgm" );
-    QVERIFY2( TestHelper::CompareImages( "dat/sagittal.pgm", "res/sagittal.pgm" ), "Image do not match to template." );
+    File::Write( sagittal, "dat/sagittal.pgm" );
+    QVERIFY2( Test::EqualImages( "dat/sagittal.pgm", "res/sagittal.pgm" ), "Image do not match to template." );
   } {
     Transform3D shear;
 /*    shear.Translate( img.size(0)/2.0, img.size(1)/2.0, img.size(2)/2.0); */
     shear.Shear( 0.0, 0.0, 0.0, 0.0, 0.0, 0.2 );
 /*    shear.Translate(-img.size(0)/2.0,-img.size(1)/2.0,-img.size(2)/2.0); */
     shear = shear.Inverse( );
-    const Image< int > img( "res/0-brain.nii.gz" );
+    const Image< int > img = File::Read< int >( "res/0-brain.nii.gz" );
     Image< int > res( img.Dim( ) );
     for( size_t z = 0; z < res.size( 2 ); ++z ) {
       for( size_t y = 0; y < res.size( 1 ); ++y ) {
@@ -392,8 +392,8 @@ void TestGeometrics::testImageTransform( ) {
         }
       }
     }
-    res.Write( "dat/shear.nii.gz", "res/0-brain.nii.gz" );
-    QVERIFY2( TestHelper::CompareImages( "dat/shear.nii.gz", "res/shear.nii.gz" ), "Image do not match to template." );
+    File::Write( res, "dat/shear.nii.gz", "res/0-brain.nii.gz" );
+    QVERIFY2( Test::EqualImages( "dat/shear.nii.gz", "res/shear.nii.gz" ), "Image do not match to template." );
   }
   cout << "Elapsed time: " << time.elapsed( ) << endl;
 }
