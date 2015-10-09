@@ -1,5 +1,5 @@
 #include "stlviewer.h"
-
+#include "MarchingCubes.hpp"
 #include <QApplication>
 #include <QDebug>
 #include <QKeyEvent>
@@ -14,15 +14,22 @@ STLViewer::STLViewer( QWidget *parent ) : QOpenGLWidget( parent ) {
   setFocusPolicy( Qt::StrongFocus );
   QStringList args = QApplication::arguments( );
   if( args.size( ) == 2 ) {
-    LoadStl( args.at( 1 ) );
+    LoadFile( args.at( 1 ) );
   }
 }
 
-void STLViewer::LoadStl( QString stlFile ) {
+void STLViewer::LoadFile( QString fileName ) {
   clear( );
   resetTransform( );
-  COMMENT( "Loading stl file: " << stlFile.toStdString( ), 0 );
-  mesh = Bial::TriangleMesh::ReadSTLB( stlFile.trimmed( ).toStdString( ) );
+  COMMENT( "Loading stl file: " << fileName.toStdString( ), 0 );
+  if( fileName.endsWith( ".stl" ) || fileName.endsWith( ".stl.gz" ) ) {
+    mesh = Bial::TriangleMesh::ReadSTLB( fileName.trimmed( ).toStdString( ) );
+  }else{
+    Bial::Image<int> img = Bial::Geometrics::Scale(Bial::File::Read<int>(fileName.toStdString()),0.25,true);
+
+    mesh = Bial::MarchingCubes::exec( img, 50.f );
+
+  }
 /*    mesh->Print( std::cout ); */
   size_t *vertexIndex = mesh->getVertexIndex( );
   Bial::Point3D *p = mesh->getP( );
@@ -51,6 +58,7 @@ void STLViewer::LoadStl( QString stlFile ) {
       norms[ t * 3 ] = static_cast< GLdouble >( norm.x );
       norms[ t * 3 + 1 ] = static_cast< GLdouble >( norm.y );
       norms[ t * 3 + 2 ] = static_cast< GLdouble >( norm.z );
+/*      std::cout << norm << std::endl; */
     }
   }
   else {
@@ -61,13 +69,23 @@ void STLViewer::LoadStl( QString stlFile ) {
   boundings[ 2 ] = zs;
 }
 
+GLfloat lightPos[] = { 0.0f, 0.0f, 500.0f, 10 };
+GLfloat specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+GLfloat specref[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+GLfloat ambientLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+
 void STLViewer::initializeGL( ) {
-  glClearColor( 0, 0, 0, 1 );
-  glEnable( GL_DEPTH_TEST );
   glEnable( GL_LIGHTING );
+  glClearColor( 0, 0, 0, 1 );
+  glShadeModel( GL_SMOOTH );
+  glLightModelfv( GL_LIGHT_MODEL_AMBIENT, ambientLight );
+  glLightfv( GL_LIGHT0, GL_DIFFUSE, ambientLight );
+  glLightfv( GL_LIGHT0, GL_SPECULAR, specular );
+  glLightfv( GL_LIGHT0, GL_POSITION, lightPos );
+  glLightf( GL_LIGHT0, GL_SPOT_CUTOFF, 60.0f );
   glEnable( GL_LIGHT0 );
-  glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
-  glEnable( GL_COLOR_MATERIAL );
+
+  glEnable( GL_DEPTH_TEST );
 }
 
 void STLViewer::resizeGL( int w, int h ) {
@@ -78,6 +96,12 @@ void STLViewer::resizeGL( int w, int h ) {
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity( );
   gluLookAt( 0, 0, -2, 0, 0, 0, 0, 1, 0 );
+  if( verts ) {
+    glVertexPointer( 3, GL_DOUBLE, 0, verts );
+  }
+  if( norms ) {
+    glNormalPointer( GL_DOUBLE, 0, norms );
+  }
 }
 
 
@@ -92,20 +116,17 @@ void STLViewer::paintGL( ) {
   glRotatef( rotateZ, 0, 0, 1 ); /* Apply rotations. */
   glRotatef( rotateY, 0, 1, 0 );
   glRotatef( rotateX, 1, 0, 0 );
-  if( verts ) {
-    glVertexPointer( 3, GL_DOUBLE, 0, verts );
-  }
-  if( norms ) {
-    glNormalPointer( GL_DOUBLE, 0, norms );
-  }
+
   glPushMatrix( );
 
   glScaled( 1.0 / boundings[ 0 ], 1.0 / boundings[ 1 ], 1.0 / boundings[ 2 ] );
 
-  GLfloat red[] = { .8f, 0.f, 0.f, 1.f };
+  GLfloat red[] = { 0.2f, 0.2f, 0.2f, 1.f };
   glMaterialfv( GL_FRONT, GL_DIFFUSE, red );
-  GLfloat blue[] = { 0.f, 0.f, 0.8f, 1.f };
-  glMaterialfv( GL_BACK, GL_DIFFUSE, blue );
+/*
+ *  GLfloat blue[] = { 0.f, 0.f, 0.8f, 1.f };
+ *  glMaterialfv( GL_BACK, GL_DIFFUSE, blue );
+ */
 
   glTranslated( -boundings[ 0 ] / 2.0, -boundings[ 1 ] / 2.0, -boundings[ 2 ] / 2.0 );
   glEnableClientState( GL_VERTEX_ARRAY );
