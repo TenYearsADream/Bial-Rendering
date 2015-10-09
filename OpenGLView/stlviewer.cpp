@@ -19,7 +19,7 @@ STLViewer::STLViewer( QWidget *parent ) : QOpenGLWidget( parent ) {
 }
 
 void STLViewer::LoadStl( QString stlFile ) {
-  clear();
+  clear( );
   resetTransform( );
   COMMENT( "Loading stl file: " << stlFile.toStdString( ), 0 );
   mesh = Bial::TriangleMesh::ReadSTLB( stlFile.trimmed( ).toStdString( ) );
@@ -44,7 +44,8 @@ void STLViewer::LoadStl( QString stlFile ) {
     zs = std::max( zs, point.z );
   }
   if( n != nullptr ) {
-    norms = new GLdouble[ mesh->getNverts( ) * 3 ];
+    COMMENT( "Reading normals.", 0 );
+    norms = new GLdouble[ mesh->getNtris( ) * 3 ];
     for( size_t t = 0; t < mesh->getNtris( ); ++t ) {
       const Bial::Normal &norm = n[ t ];
       norms[ t * 3 ] = static_cast< GLdouble >( norm.x );
@@ -91,9 +92,12 @@ void STLViewer::paintGL( ) {
   glRotatef( rotateZ, 0, 0, 1 ); /* Apply rotations. */
   glRotatef( rotateY, 0, 1, 0 );
   glRotatef( rotateX, 1, 0, 0 );
-
-  glVertexPointer( 3, GL_DOUBLE, 0, verts );
-
+  if( verts ) {
+    glVertexPointer( 3, GL_DOUBLE, 0, verts );
+  }
+  if( norms ) {
+    glNormalPointer( GL_DOUBLE, 0, norms );
+  }
   glPushMatrix( );
 
   glScaled( 1.0 / boundings[ 0 ], 1.0 / boundings[ 1 ], 1.0 / boundings[ 2 ] );
@@ -107,7 +111,9 @@ void STLViewer::paintGL( ) {
   glEnableClientState( GL_VERTEX_ARRAY );
   glEnable( GL_POLYGON_OFFSET_FILL );
   glPolygonOffset( 1, 1 );
-  glDrawElements( GL_TRIANGLES, mesh->getNtris( ) * 3, GL_UNSIGNED_INT, tris );
+  if( tris ) {
+    glDrawElements( GL_TRIANGLES, mesh->getNtris( ) * 3, GL_UNSIGNED_INT, tris );
+  }
   glDisable( GL_POLYGON_OFFSET_FILL );
   glDisableClientState( GL_VERTEX_ARRAY );
 
