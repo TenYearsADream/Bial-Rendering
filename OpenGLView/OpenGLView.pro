@@ -24,3 +24,5 @@ HEADERS  += mainwindow.h \
 FORMS    += mainwindow.ui
 
 LIBS += -lGL -lGLU -lglut
+
+CONFIG += c++11
