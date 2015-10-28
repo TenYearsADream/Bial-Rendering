@@ -12,10 +12,6 @@ STLViewer::STLViewer( QWidget *parent ) : QOpenGLWidget( parent ) {
   tris = nullptr;
   setFocus( );
   setFocusPolicy( Qt::StrongFocus );
-  QStringList args = QApplication::arguments( );
-  if( args.size( ) == 2 ) {
-    LoadFile( args.at( 1 ) );
-  }
 }
 
 void STLViewer::LoadFile( QString fileName ) {

@@ -3,9 +3,20 @@
 
 #include <QFileDialog>
 #include <QKeyEvent>
+#include <QMessageBox>
 
 MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::MainWindow ) {
   ui->setupUi( this );
+  QStringList args = QApplication::arguments( );
+  if( args.size( ) == 2 ) {
+    QFileInfo info(args.at(1));
+    if(info.isFile()){
+      ui->openGLWidget->LoadFile( info.absoluteFilePath() );
+    }else{
+      QMessageBox::warning(this, "ERROR", "File not found.");
+      exit(1);
+    }
+  }
 }
 
 MainWindow::~MainWindow( ) {
