@@ -19,10 +19,18 @@ SOURCES += main.cpp\
     stlviewer.cpp
 
 HEADERS  += mainwindow.h \
-    stlviewer.h
+    stlviewer.h \
+    glassert.h
 
 FORMS    += mainwindow.ui
 
 LIBS += -lGL -lGLU -lglut
 
 CONFIG += c++11
+
+DISTFILES += \
+    phong.frag \
+    phong.vert
+
+RESOURCES += \
+    resources.qrc

@@ -4,11 +4,22 @@
 #include <Draw.hpp>
 #include <GL/glu.h>
 #include <GL/glut.h>
+#include <QOpenGLBuffer>
+#include <QOpenGLFunctions>
+#include <QOpenGLPaintDevice>
+#include <QOpenGLShaderProgram>
+#include <QOpenGLTexture>
+#include <QOpenGLVertexArrayObject>
 #include <QOpenGLWidget>
 #include <QWidget>
 
 class STLViewer : public QOpenGLWidget {
   Q_OBJECT
+
+  QOpenGLShaderProgram mShaderProgram;
+  QOpenGLVertexArrayObject mVAO;
+  QOpenGLBuffer mVertexPositionBuffer;
+  QOpenGLBuffer mVertexColorBuffer;
 
   Bial::TriangleMesh *mesh;
   GLdouble *verts;
@@ -23,7 +34,12 @@ class STLViewer : public QOpenGLWidget {
   QPoint lastPoint;
 public:
   explicit STLViewer( QWidget *parent = 0 );
+  virtual ~STLViewer();
   void LoadFile(QString stlFile);
+  void prepareShaderProgram();
+
+  void prepareVertexBuffers();
+
 protected:
   void resetTransform();
   void initializeGL( );
