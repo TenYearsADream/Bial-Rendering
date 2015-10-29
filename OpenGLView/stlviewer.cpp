@@ -33,53 +33,53 @@ STLViewer::~STLViewer() {
 }
 
 void STLViewer::LoadFile( QString fileName ) {
-//  clear( );
-//  resetTransform( );
-//  COMMENT( "Loading stl file: " << fileName.toStdString( ), 0 );
-//  if( fileName.endsWith( ".stl" ) || fileName.endsWith( ".stl.gz" ) ) {
-//    mesh = Bial::TriangleMesh::ReadSTLB( fileName.trimmed( ).toStdString( ) );
-//  } else {
-//    Bial::Image<int> img = Bial::Geometrics::Scale(Bial::File::Read<int>(fileName.toStdString()),0.25,true);
+  clear( );
+  resetTransform( );
+  COMMENT( "Loading stl file: " << fileName.toStdString( ), 0 );
+  if( fileName.endsWith( ".stl" ) || fileName.endsWith( ".stl.gz" ) ) {
+    mesh = Bial::TriangleMesh::ReadSTLB( fileName.trimmed( ).toStdString( ) );
+  } else {
+    Bial::Image<int> img = Bial::Geometrics::Scale(Bial::File::Read<int>(fileName.toStdString()),0.25,true);
 
-//    mesh = Bial::MarchingCubes::exec( img, 50.f );
+    mesh = Bial::MarchingCubes::exec( img, 50.f );
 
-//  }
-//  /*    mesh->Print( std::cout ); */
-//  size_t *vertexIndex = mesh->getVertexIndex( );
-//  Bial::Point3D *p = mesh->getP( );
-//  Bial::Normal *n = mesh->getN( );
-//  verts = new GLdouble[ mesh->getNverts( ) * 3 ];
-//  tris = new GLuint[ mesh->getNtris( ) * 3 ];
-//  for( size_t vtx = 0; vtx < ( mesh->getNtris( ) * 3 ); ++vtx ) {
-//    tris[ vtx ] = static_cast< GLuint >( vertexIndex[ vtx ] );
-//  }
-//  double xs( 0.0 ), ys( 0.0 ), zs( 0.0 );
-//  for( size_t pt = 0; pt < mesh->getNverts( ); ++pt ) {
-//    const Bial::Point3D &point = p[ pt ];
-//    verts[ pt * 3 ] = static_cast< GLdouble >( point.x );
-//    verts[ pt * 3 + 1 ] = static_cast< GLdouble >( point.y );
-//    verts[ pt * 3 + 2 ] = static_cast< GLdouble >( point.z );
+  }
+  /*    mesh->Print( std::cout ); */
+  size_t *vertexIndex = mesh->getVertexIndex( );
+  Bial::Point3D *p = mesh->getP( );
+  Bial::Normal *n = mesh->getN( );
+  verts = new GLdouble[ mesh->getNverts( ) * 3 ];
+  tris = new GLuint[ mesh->getNtris( ) * 3 ];
+  for( size_t vtx = 0; vtx < ( mesh->getNtris( ) * 3 ); ++vtx ) {
+    tris[ vtx ] = static_cast< GLuint >( vertexIndex[ vtx ] );
+  }
+  double xs( 0.0 ), ys( 0.0 ), zs( 0.0 );
+  for( size_t pt = 0; pt < mesh->getNverts( ); ++pt ) {
+    const Bial::Point3D &point = p[ pt ];
+    verts[ pt * 3 ] = static_cast< GLdouble >( point.x );
+    verts[ pt * 3 + 1 ] = static_cast< GLdouble >( point.y );
+    verts[ pt * 3 + 2 ] = static_cast< GLdouble >( point.z );
 
-//    xs = std::max( xs, point.x );
-//    ys = std::max( ys, point.y );
-//    zs = std::max( zs, point.z );
-//  }
-//  if( n != nullptr ) {
-//    COMMENT( "Reading normals.", 0 );
-//    norms = new GLdouble[ mesh->getNtris( ) * 3 ];
-//    for( size_t t = 0; t < mesh->getNtris( ); ++t ) {
-//      const Bial::Normal &norm = n[ t ];
-//      norms[ t * 3 ] = static_cast< GLdouble >( norm.x );
-//      norms[ t * 3 + 1 ] = static_cast< GLdouble >( norm.y );
-//      norms[ t * 3 + 2 ] = static_cast< GLdouble >( norm.z );
-//      /*      std::cout << norm << std::endl; */
-//    }
-//  } else {
-//    norms = nullptr;
-//  }
-//  boundings[ 0 ] = xs;
-//  boundings[ 1 ] = ys;
-//  boundings[ 2 ] = zs;
+    xs = std::max( xs, point.x );
+    ys = std::max( ys, point.y );
+    zs = std::max( zs, point.z );
+  }
+  if( n != nullptr ) {
+    COMMENT( "Reading normals.", 0 );
+    norms = new GLdouble[ mesh->getNtris( ) * 3 ];
+    for( size_t t = 0; t < mesh->getNtris( ); ++t ) {
+      const Bial::Normal &norm = n[ t ];
+      norms[ t * 3 ] = static_cast< GLdouble >( norm.x );
+      norms[ t * 3 + 1 ] = static_cast< GLdouble >( norm.y );
+      norms[ t * 3 + 2 ] = static_cast< GLdouble >( norm.z );
+      /*      std::cout << norm << std::endl; */
+    }
+  } else {
+    norms = nullptr;
+  }
+  boundings[ 0 ] = xs;
+  boundings[ 1 ] = ys;
+  boundings[ 2 ] = zs;
 }
 
 GLfloat lightPos[] = { 0.0f, 0.0f, 500.0f, 10 };
@@ -143,13 +143,6 @@ void STLViewer::initializeGL( ) {
 
   prepareVertexBuffers();
 
-//  m_vbo.allocate(...);
-
-//  m_texture = new QOpenGLTexture(QImage(...));
-
-//  m_shader = new QOpenGLShader(...);
-//  m_program = new QOpenGLShaderProgram(...);
-
 //  glEnable( GL_LIGHTING );
 //  glClearColor( 0, 0, 0, 1 );
 //  glShadeModel( GL_SMOOTH );
@@ -166,7 +159,6 @@ void STLViewer::initializeGL( ) {
 void STLViewer::resizeGL( int w, int h ) {
   glAssert( glViewport(0, 0, w, h) );
 
-//  glViewport( 0, 0, w, h );
 //  glMatrixMode( GL_PROJECTION );
 //  glLoadIdentity( );
 //  gluPerspective( 60, ( float ) w / h, .01, 2.0 );
@@ -183,18 +175,14 @@ void STLViewer::resizeGL( int w, int h ) {
 
 
 void STLViewer::paintGL( ) {
-//  QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-//  f->glClear(GL_DEPTH_BUFFER_BIT);
 
-  glAssert( glClear(GL_COLOR_BUFFER_BIT) );
+  glAssert( glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT) );
 
   mShaderProgram.bind();
   mVAO.bind();
 
-  glAssert( glDrawArrays(GL_TRIANGLES, 0, 3) );
-
-
-//  glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+//  QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+//  f->glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
 //  glLoadIdentity( ); /* Set up modelview transform, first cube. */
 //  glPushMatrix( );
@@ -203,6 +191,8 @@ void STLViewer::paintGL( ) {
 //  glRotatef( rotateZ, 0, 0, 1 ); /* Apply rotations. */
 //  glRotatef( rotateY, 0, 1, 0 );
 //  glRotatef( rotateX, 1, 0, 0 );
+
+  glAssert( glDrawArrays(GL_TRIANGLES, 0, 3) );
 
 //  glPushMatrix( );
 
