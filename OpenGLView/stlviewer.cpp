@@ -71,7 +71,7 @@ void STLViewer::LoadFile( QString fileName ) {
 GLfloat lightPos[] = { 0.0f, 0.0f, 500.0f, 10 };
 GLfloat specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 GLfloat specref[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-GLfloat ambientLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+GLfloat ambientLight[] = { 0.5f, 0.5f, 0.5f, 0.5f };
 
 void STLViewer::initializeGL( ) {
   glEnable( GL_LIGHTING );
@@ -103,11 +103,13 @@ void STLViewer::resizeGL( int w, int h ) {
   gluPerspective( 60, ( float ) w / h, .01, 2.0 );
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity( );
-//  gluLookAt( 0, 0, -2, 0, 0, 0, 0, 1, 0 );
+/*  gluLookAt( 0, 0, -2, 0, 0, 0, 0, 1, 0 ); */
   if( verts ) {
+    qDebug() << "Verts found";
     glVertexPointer( 3, GL_DOUBLE, 0, verts );
   }
   if( norms ) {
+    qDebug() << "Norms found";
     glNormalPointer( GL_DOUBLE, 0, norms );
   }
   glCheckError( );
@@ -130,13 +132,13 @@ void STLViewer::paintGL( ) {
 
   glScaled( 1.0 / boundings[ 0 ], 1.0 / boundings[ 1 ], 1.0 / boundings[ 2 ] );
 
-  /*
-   *  GLfloat red[] = { 0.2f, 0.2f, 0.2f, 1.f };
-   *  glMaterialfv( GL_FRONT, GL_DIFFUSE, red );
-   *
-   *  GLfloat blue[] = { 0.f, 0.f, 0.8f, 1.f };
-   *  glMaterialfv( GL_BACK, GL_DIFFUSE, blue );
-   */
+
+//  GLfloat red[] = { 0.2f, 0.2f, 0.2f, 1.f };
+//  glMaterialfv( GL_FRONT, GL_DIFFUSE, red );
+//
+//  GLfloat blue[] = { 0.f, 0.f, 0.8f, 1.f };
+//  glMaterialfv( GL_BACK, GL_DIFFUSE, blue );
+
 
   glColor4f( 1, 1, 1, 0.5 );
 
