@@ -1,9 +1,11 @@
-#include "stlviewer.h"
-#include "MarchingCubes.hpp"
 #include <QApplication>
 #include <QDebug>
 #include <QKeyEvent>
 #include <QOpenGLFunctions>
+
+#include "glassert.h"
+#include "stlviewer.h"
+#include "MarchingCubes.hpp"
 
 STLViewer::STLViewer( QWidget *parent ) : QOpenGLWidget( parent ) {
   mesh = nullptr;
@@ -88,6 +90,8 @@ void STLViewer::initializeGL( ) {
   // Enable OpenGL Antialiasing functions.
   glEnable(GL_LINE_SMOOTH);
   glEnable(GL_POLYGON_SMOOTH);
+
+  glCheckError();
 }
 
 void STLViewer::resizeGL( int w, int h ) {
@@ -104,6 +108,7 @@ void STLViewer::resizeGL( int w, int h ) {
   if( norms ) {
     glNormalPointer( GL_DOUBLE, 0, norms );
   }
+  glCheckError();
 }
 
 
@@ -159,6 +164,8 @@ void STLViewer::paintGL( ) {
   glEnd( );
 
   glPopMatrix( );
+
+  glCheckError();
 }
 
 void STLViewer::clear( ) {

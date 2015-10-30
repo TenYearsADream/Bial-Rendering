@@ -19,7 +19,8 @@ SOURCES += main.cpp\
     stlviewer.cpp
 
 HEADERS  += mainwindow.h \
-    stlviewer.h
+    stlviewer.h \
+    glassert.h
 
 FORMS    += mainwindow.ui
 
