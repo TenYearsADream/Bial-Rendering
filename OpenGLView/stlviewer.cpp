@@ -20,13 +20,13 @@ void STLViewer::LoadFile( QString fileName ) {
   COMMENT( "Loading stl file: " << fileName.toStdString( ), 0 );
   if( fileName.endsWith( ".stl" ) || fileName.endsWith( ".stl.gz" ) ) {
     mesh = Bial::TriangleMesh::ReadSTLB( fileName.trimmed( ).toStdString( ) );
-  }else{
+  } else {
     Bial::Image<int> img = Bial::Geometrics::Scale(Bial::File::Read<int>(fileName.toStdString()),0.25,true);
 
     mesh = Bial::MarchingCubes::exec( img, 50.f );
 
   }
-/*    mesh->Print( std::cout ); */
+  /*    mesh->Print( std::cout ); */
   size_t *vertexIndex = mesh->getVertexIndex( );
   Bial::Point3D *p = mesh->getP( );
   Bial::Normal *n = mesh->getN( );
@@ -54,10 +54,9 @@ void STLViewer::LoadFile( QString fileName ) {
       norms[ t * 3 ] = static_cast< GLdouble >( norm.x );
       norms[ t * 3 + 1 ] = static_cast< GLdouble >( norm.y );
       norms[ t * 3 + 2 ] = static_cast< GLdouble >( norm.z );
-/*      std::cout << norm << std::endl; */
+      /*      std::cout << norm << std::endl; */
     }
-  }
-  else {
+  } else {
     norms = nullptr;
   }
   boundings[ 0 ] = xs;
@@ -80,8 +79,15 @@ void STLViewer::initializeGL( ) {
   glLightfv( GL_LIGHT0, GL_POSITION, lightPos );
   glLightf( GL_LIGHT0, GL_SPOT_CUTOFF, 60.0f );
   glEnable( GL_LIGHT0 );
-
   glEnable( GL_DEPTH_TEST );
+  //Enable color
+  glEnable( GL_COLOR_MATERIAL );
+  // Enable opacity
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  // Enable OpenGL Antialiasing functions.
+  glEnable(GL_LINE_SMOOTH);
+  glEnable(GL_POLYGON_SMOOTH);
 }
 
 void STLViewer::resizeGL( int w, int h ) {
@@ -104,6 +110,7 @@ void STLViewer::resizeGL( int w, int h ) {
 void STLViewer::paintGL( ) {
 
   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+  glClearColor( 0, 0, 0, 1 );
 
   glLoadIdentity( ); /* Set up modelview transform, first cube. */
   glPushMatrix( );
@@ -117,12 +124,15 @@ void STLViewer::paintGL( ) {
 
   glScaled( 1.0 / boundings[ 0 ], 1.0 / boundings[ 1 ], 1.0 / boundings[ 2 ] );
 
-  GLfloat red[] = { 0.2f, 0.2f, 0.2f, 1.f };
-  glMaterialfv( GL_FRONT, GL_DIFFUSE, red );
-/*
- *  GLfloat blue[] = { 0.f, 0.f, 0.8f, 1.f };
- *  glMaterialfv( GL_BACK, GL_DIFFUSE, blue );
- */
+  /*
+   *  GLfloat red[] = { 0.2f, 0.2f, 0.2f, 1.f };
+   *  glMaterialfv( GL_FRONT, GL_DIFFUSE, red );
+   *
+   *  GLfloat blue[] = { 0.f, 0.f, 0.8f, 1.f };
+   *  glMaterialfv( GL_BACK, GL_DIFFUSE, blue );
+   */
+
+  glColor4f(1,1,1,0.5);
 
   glTranslated( -boundings[ 0 ] / 2.0, -boundings[ 1 ] / 2.0, -boundings[ 2 ] / 2.0 );
   glEnableClientState( GL_VERTEX_ARRAY );
@@ -173,27 +183,27 @@ void STLViewer::clear( ) {
 
 void STLViewer::keyPressEvent( QKeyEvent *evt ) {
   switch( evt->key( ) ) {
-      case Qt::Key_Left:
-      rotateY -= 15;
-      break;
-      case Qt::Key_Right:
-      rotateY += 15;
-      break;
-      case Qt::Key_Down:
-      rotateX -= 15;
-      break;
-      case Qt::Key_Up:
-      rotateX += 15;
-      break;
-      case Qt::Key_PageUp:
-      rotateZ -= 15;
-      break;
-      case Qt::Key_PageDown:
-      rotateZ += 15;
-      break;
-      case Qt::Key_Home:
-      resetTransform( );
-      break;
+  case Qt::Key_Left:
+    rotateY -= 15;
+    break;
+  case Qt::Key_Right:
+    rotateY += 15;
+    break;
+  case Qt::Key_Down:
+    rotateX -= 15;
+    break;
+  case Qt::Key_Up:
+    rotateX += 15;
+    break;
+  case Qt::Key_PageUp:
+    rotateZ -= 15;
+    break;
+  case Qt::Key_PageDown:
+    rotateZ += 15;
+    break;
+  case Qt::Key_Home:
+    resetTransform( );
+    break;
   }
   update( );
 }
