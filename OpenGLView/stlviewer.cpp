@@ -8,6 +8,7 @@
 #include "glassert.h"
 #include "stlviewer.h"
 
+
 STLViewer::STLViewer( QWidget *parent ) : QOpenGLWidget( parent ) {
   mesh = nullptr;
   verts = nullptr;
@@ -28,7 +29,7 @@ void STLViewer::LoadFile( QString fileName ) {
     QTime t;
     t.start( );
     qDebug( ) << "Running marching cubes algorithm.";
-    Bial::Image< int > img = Bial::Geometrics::Scale( Bial::File::Read< int >( fileName.toStdString( ) ), 0.25, true );
+    Bial::Image< int > img = Bial::Geometrics::Scale( Bial::File::Read< int >( fileName.toStdString( ) ), 0.3, true );
 
     mesh = Bial::MarchingCubes::exec( img, 50.f );
     qDebug( ) << "Elapsed: " << t.elapsed( ) << " ms";
@@ -72,26 +73,14 @@ void STLViewer::LoadFile( QString fileName ) {
   boundings[ 2 ] = zs;
 }
 
-GLfloat lightPos[] = { 0.0f, 0.0f, 10.0f, 10 };
-GLfloat lightDir[] = { 0.0f, 0.0f, -1.0f, 10 };
-GLfloat specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-GLfloat specref[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-GLfloat ambientLight[] = { 0.2f, 0.2f, 0.2f, 1.0f };
-GLfloat diffuse[] = { 0.1f, 0.1f, 0.1f, 1.0f };
+GLfloat ambientLight[] = { 0.5f, 0.5f, 0.5f, 1.0f };
 
 void STLViewer::initializeGL( ) {
   glEnable( GL_LIGHTING );
   glClearColor( 0, 0, 0, 1 );
   glShadeModel( GL_SMOOTH );
   glLightModelfv( GL_LIGHT_MODEL_AMBIENT, ambientLight );
-  glLightfv( GL_LIGHT0, GL_DIFFUSE, diffuse );
-  glLightfv( GL_LIGHT0, GL_SPECULAR, specular );
-  glLightfv( GL_LIGHT0, GL_POSITION, lightPos );
-  glLightfv( GL_LIGHT0, GL_SPOT_DIRECTION, lightDir );
-  glLightf( GL_LIGHT0, GL_SPOT_CUTOFF, 30.0f );
-  glLightf( GL_LIGHT0, GL_SPOT_EXPONENT, 2.5f );
-
-  glEnable( GL_LIGHT0 );
+  light1.enable( );
   glEnable( GL_DEPTH_TEST );
   /* Enable color */
   glEnable( GL_COLOR_MATERIAL );
@@ -101,6 +90,10 @@ void STLViewer::initializeGL( ) {
   /* Enable OpenGL Antialiasing functions. */
   glEnable( GL_LINE_SMOOTH );
 /*  glEnable( GL_POLYGON_SMOOTH ); */
+
+  /* Enable specular reflection according to viewer. */
+  glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+  glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 
   glCheckError( );
 }
@@ -129,33 +122,15 @@ void STLViewer::resizeGL( int w, int h ) {
 }
 
 
-void STLViewer::paintGL( ) {
-
-  glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-  glClearColor( 0, 0, 0, 1 );
-
-  Bial::Transform3D transf;
-  transf.Translate( 0, 0, -1.5 ).Scale( zoom, zoom, zoom );
-  transf.Rotate( rotateX, 0 ).Rotate( rotateY, 1 ).Rotate( rotateZ, 2 );
-  glMatrixMode( GL_MODELVIEW );
-  glLoadIdentity( );
+void STLViewer::drawTriangleMesh( ) {
   glPushMatrix( );
-  glLoadMatrixd( &transf.getAffineMatrix( ).Transposed( )[ 0 ] );
-  glPushMatrix( );
-
   glScaled( 1.0 / boundings[ 0 ], 1.0 / boundings[ 1 ], 1.0 / boundings[ 2 ] );
-
-
   GLfloat diffuseCoeff[] = { 0.2f, 0.4f, 0.9f, 1.0f };
   GLfloat specularCoeff[] = { 0.2f, 0.4f, 0.9f, 1.0f };
-
   glMaterialfv( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, diffuseCoeff );
   glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, specularCoeff );
   glMaterialf( GL_FRONT_AND_BACK, GL_SHININESS, 25.0 );
-
-
   glColor4f( 1, 1, 1, 1 );
-
   glTranslated( -boundings[ 0 ] / 2.0, -boundings[ 1 ] / 2.0, -boundings[ 2 ] / 2.0 );
   glEnable( GL_NORMALIZE );
   glEnableClientState( GL_NORMAL_ARRAY );
@@ -169,7 +144,9 @@ void STLViewer::paintGL( ) {
   glDisableClientState( GL_VERTEX_ARRAY );
   glDisableClientState( GL_NORMAL_ARRAY );
   glPopMatrix( );
+}
 
+void STLViewer::drawLines( ) {
   glBegin( GL_LINES );
   glColor3f( 1, 0, 0 );
   glVertex3d( 0, 0, 0 );
@@ -181,10 +158,6 @@ void STLViewer::paintGL( ) {
   glVertex3d( 0, 0, 0 );
   glVertex3d( 0, 0, 1 );
   glEnd( );
-
-  glPopMatrix( );
-
-  glCheckError( );
 }
 
 void STLViewer::clear( ) {
@@ -285,4 +258,36 @@ void STLViewer::mouseDoubleClickEvent( QMouseEvent *evt ) {
   resetTransform( );
   evt->accept( );
   update( );
+}
+
+
+void STLViewer::paintGL( ) {
+  /* Cleaning screen */
+  glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+  glClearColor( 0, 0, 0, 1 );
+
+  /* Loading modelView matrix */
+  glMatrixMode( GL_MODELVIEW );
+  glLoadIdentity( );
+
+  Bial::Transform3D transf;
+  transf.Translate( 0, 0, -1.5 ).Scale( zoom, zoom, zoom );
+  transf.Rotate( rotateX, 0 ).Rotate( rotateY, 1 ).Rotate( rotateZ, 2 );
+  glLoadMatrixd( &transf.getAffineMatrix( ).Transposed( )[ 0 ] );
+
+
+  drawTriangleMesh( );
+
+//  glBegin( GL_QUADS );
+//  glVertex3f( -1, -1, 0 );
+//  glVertex3f( -1, 1, 0 );
+//  glVertex3f( 1, 1, 0 );
+//  glVertex3f( 1, -1, 0 );
+//  glEnd( );
+
+  light1.draw( );
+
+  drawLines( );
+
+  glCheckError( );
 }
