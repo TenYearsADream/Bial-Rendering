@@ -1,6 +1,8 @@
 #ifndef STLVIEWER_H
 #define STLVIEWER_H
 
+#include "stlmodel.h"
+
 #include <Draw.hpp>
 #include <GL/glu.h>
 #include <GL/glut.h>
@@ -38,19 +40,14 @@ public:
 
 class STLViewer : public QOpenGLWidget {
   Q_OBJECT
-
-  Bial::TriangleMesh *mesh;
-  GLdouble *verts;
-  GLdouble *norms;
-  GLuint *tris;
   Light light1;
-  float boundings[ 3 ];
   double zoom = 1.0;
   int rotateX = 0;
   int rotateY = 0;
   int rotateZ = 0;
   bool dragging = false;
   QPoint lastPoint;
+  StlModel * model;
 public:
   explicit STLViewer( QWidget *parent = 0 );
   void LoadFile( QString stlFile );
