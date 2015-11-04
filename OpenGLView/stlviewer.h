@@ -51,7 +51,6 @@ class STLViewer : public QOpenGLWidget {
 public:
   explicit STLViewer( QWidget *parent = 0 );
   void LoadFile( QString stlFile );
-  void drawTriangleMesh( );
 
   void drawLines( );
 

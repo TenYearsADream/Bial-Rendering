@@ -60,10 +60,6 @@ void STLViewer::resizeGL( int w, int h ) {
 }
 
 
-void STLViewer::drawTriangleMesh( ) {
-  model->draw();
-}
-
 void STLViewer::drawLines( ) {
   glBegin( GL_LINES );
   glColor3f( 1, 0, 0 );
@@ -178,21 +174,11 @@ void STLViewer::paintGL( ) {
   transf.Rotate( rotateX, 0 ).Rotate( rotateY, 1 ).Rotate( rotateZ, 2 );
   glLoadMatrixd( &transf.getAffineMatrix( ).Transposed( )[ 0 ] );
 
+  model->draw();
 
-  drawTriangleMesh( );
+//  light1.draw( );
 
-/*
- *  glBegin( GL_QUADS );
- *  glVertex3f( -1, -1, 0 );
- *  glVertex3f( -1, 1, 0 );
- *  glVertex3f( 1, 1, 0 );
- *  glVertex3f( 1, -1, 0 );
- *  glEnd( );
- */
-
-  light1.draw( );
-
-  drawLines( );
+//  drawLines( );
 
   glCheckError( );
 }
