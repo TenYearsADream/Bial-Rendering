@@ -92,6 +92,10 @@ void StlModel::reload( ) {
 }
 
 void StlModel::draw( ) {
+  mVAO.bind( );
+  glAssert( glDrawArrays( GL_TRIANGLES, 0, 3 ) );
+
+  return;
   glPushMatrix( );
   glScaled( 1.0 / boundings[ 0 ], 1.0 / boundings[ 1 ], 1.0 / boundings[ 2 ] );
   GLfloat diffuseCoeff[] = { 0.2f, 0.4f, 0.9f, 1.0f };
@@ -113,4 +117,41 @@ void StlModel::draw( ) {
   glDisableClientState( GL_VERTEX_ARRAY );
   glDisableClientState( GL_NORMAL_ARRAY );
   glPopMatrix( );
+}
+
+void StlModel::prepareVertexBuffers( QOpenGLShaderProgram &mShaderProgram) {
+  float positionData[] = {
+    -0.8f, -0.8f, 0.0f,
+    0.8f, -0.8f, 0.0f,
+    0.0f, 0.8f, 0.0f
+  };
+  float colorData[] = {
+    1.0f, 0.0f, 0.0f,
+    0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 1.0f
+  };
+
+  mVAO.create( );
+  mVAO.bind( );
+
+  mVertexPositionBuffer.create( );
+  mVertexPositionBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
+  mVertexPositionBuffer.bind( );
+  mVertexPositionBuffer.allocate( positionData, 3 * 3 * sizeof( float ) );
+
+  mVertexColorBuffer.create( );
+  mVertexColorBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
+  mVertexColorBuffer.bind( );
+  mVertexColorBuffer.allocate( colorData, 3 * 3 * sizeof( float ) );
+
+  mShaderProgram.bind( );
+
+  mVertexPositionBuffer.bind( );
+  mShaderProgram.enableAttributeArray( "vertexPosition" );
+  mShaderProgram.setAttributeBuffer( "vertexPosition", GL_FLOAT, 0, 3 );
+
+  mVertexColorBuffer.bind( );
+  mShaderProgram.enableAttributeArray( "vertexColor" );
+  mShaderProgram.setAttributeBuffer( "vertexColor", GL_FLOAT, 0, 3 );
+  glCheckError( );
 }

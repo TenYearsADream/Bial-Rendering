@@ -50,9 +50,6 @@ class STLViewer : public QOpenGLWidget {
   Q_OBJECT
 
   QOpenGLShaderProgram mShaderProgram;
-  QOpenGLVertexArrayObject mVAO;
-  QOpenGLBuffer mVertexPositionBuffer;
-  QOpenGLBuffer mVertexColorBuffer;
 
   Light light1;
   double zoom = 1.0;
@@ -67,8 +64,6 @@ public:
   virtual ~STLViewer( );
   void LoadFile( QString stlFile );
   void prepareShaderProgram( );
-
-  void prepareVertexBuffers( );
 
   void drawLines( );
 

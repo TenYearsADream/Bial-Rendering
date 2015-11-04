@@ -53,47 +53,8 @@ void STLViewer::prepareShaderProgram( ) {
   glCheckError( );
 }
 
-void STLViewer::prepareVertexBuffers( ) {
-  float positionData[] = {
-    -0.8f, -0.8f, 0.0f,
-    0.8f, -0.8f, 0.0f,
-    0.0f, 0.8f, 0.0f
-  };
-  float colorData[] = {
-    1.0f, 0.0f, 0.0f,
-    0.0f, 1.0f, 0.0f,
-    0.0f, 0.0f, 1.0f
-  };
-
-  mVAO.create( );
-  mVAO.bind( );
-
-  mVertexPositionBuffer.create( );
-  mVertexPositionBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
-  mVertexPositionBuffer.bind( );
-  mVertexPositionBuffer.allocate( positionData, 3 * 3 * sizeof( float ) );
-
-  mVertexColorBuffer.create( );
-  mVertexColorBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
-  mVertexColorBuffer.bind( );
-  mVertexColorBuffer.allocate( colorData, 3 * 3 * sizeof( float ) );
-
-  mShaderProgram.bind( );
-
-  mVertexPositionBuffer.bind( );
-  mShaderProgram.enableAttributeArray( "vertexPosition" );
-  mShaderProgram.setAttributeBuffer( "vertexPosition", GL_FLOAT, 0, 3 );
-
-  mVertexColorBuffer.bind( );
-  mShaderProgram.enableAttributeArray( "vertexColor" );
-  mShaderProgram.setAttributeBuffer( "vertexColor", GL_FLOAT, 0, 3 );
-  glCheckError( );
-}
-
 void STLViewer::initializeGL( ) {
   prepareShaderProgram( );
-
-  prepareVertexBuffers( );
 
 /*
  *  glEnable( GL_LIGHTING );
@@ -130,10 +91,7 @@ void STLViewer::paintGL( ) {
   glAssert( glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ) );
 
   mShaderProgram.bind( );
-  mVAO.bind( );
-
-  glAssert( glDrawArrays( GL_TRIANGLES, 0, 3 ) );
-
+  model->draw();
 
 //  /* Cleaning screen */
 //  glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
