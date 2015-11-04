@@ -16,11 +16,13 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    stlviewer.cpp
+    stlviewer.cpp \
+    stlmodel.cpp
 
 HEADERS  += mainwindow.h \
     stlviewer.h \
-    glassert.h
+    glassert.h \
+    stlmodel.h
 
 FORMS    += mainwindow.ui
 

@@ -1,110 +1,63 @@
-#include "stlviewer.h"
-#include "MarchingCubes.hpp"
 #include <QApplication>
 #include <QDebug>
 #include <QKeyEvent>
 #include <QOpenGLFunctions>
+#include <QTime>
+
+#include "MarchingCubes.hpp"
+#include "glassert.h"
+#include "stlviewer.h"
+
 
 #include "glassert.h"
 
 STLViewer::STLViewer( QWidget *parent ) : QOpenGLWidget( parent ) {
-  verts = nullptr;
-  norms = nullptr;
-  tris = nullptr;
-  mesh = nullptr;
   setFocus( );
   setFocusPolicy( Qt::StrongFocus );
 
   QSurfaceFormat format;
-  format.setDepthBufferSize(24);
-  format.setStencilBufferSize(8);
-  format.setVersion(3, 2);
-  format.setProfile(QSurfaceFormat::CoreProfile);
-  QSurfaceFormat::setDefaultFormat(format);
-  setFormat(format);
+  format.setDepthBufferSize( 24 );
+  format.setStencilBufferSize( 8 );
+  format.setVersion( 3, 2 );
+  format.setProfile( QSurfaceFormat::CoreProfile );
+  QSurfaceFormat::setDefaultFormat( format );
+  setFormat( format );
 }
 
-STLViewer::~STLViewer() {
-  makeCurrent();
+STLViewer::~STLViewer( ) {
+  makeCurrent( );
 
-  clear();
+  clear( );
 
-  doneCurrent();
+  doneCurrent( );
 }
 
 void STLViewer::LoadFile( QString fileName ) {
   clear( );
   resetTransform( );
-  COMMENT( "Loading stl file: " << fileName.toStdString( ), 0 );
-  if( fileName.endsWith( ".stl" ) || fileName.endsWith( ".stl.gz" ) ) {
-    mesh = Bial::TriangleMesh::ReadSTLB( fileName.trimmed( ).toStdString( ) );
-  } else {
-    Bial::Image<int> img = Bial::Geometrics::Scale(Bial::File::Read<int>(fileName.toStdString()),0.25,true);
-
-    mesh = Bial::MarchingCubes::exec( img, 50.f );
-
-  }
-  /*    mesh->Print( std::cout ); */
-  size_t *vertexIndex = mesh->getVertexIndex( );
-  Bial::Point3D *p = mesh->getP( );
-  Bial::Normal *n = mesh->getN( );
-  verts = new GLdouble[ mesh->getNverts( ) * 3 ];
-  tris = new GLuint[ mesh->getNtris( ) * 3 ];
-  for( size_t vtx = 0; vtx < ( mesh->getNtris( ) * 3 ); ++vtx ) {
-    tris[ vtx ] = static_cast< GLuint >( vertexIndex[ vtx ] );
-  }
-  double xs( 0.0 ), ys( 0.0 ), zs( 0.0 );
-  for( size_t pt = 0; pt < mesh->getNverts( ); ++pt ) {
-    const Bial::Point3D &point = p[ pt ];
-    verts[ pt * 3 ] = static_cast< GLdouble >( point.x );
-    verts[ pt * 3 + 1 ] = static_cast< GLdouble >( point.y );
-    verts[ pt * 3 + 2 ] = static_cast< GLdouble >( point.z );
-
-    xs = std::max( xs, point.x );
-    ys = std::max( ys, point.y );
-    zs = std::max( zs, point.z );
-  }
-  if( n != nullptr ) {
-    COMMENT( "Reading normals.", 0 );
-    norms = new GLdouble[ mesh->getNtris( ) * 3 ];
-    for( size_t t = 0; t < mesh->getNtris( ); ++t ) {
-      const Bial::Normal &norm = n[ t ];
-      norms[ t * 3 ] = static_cast< GLdouble >( norm.x );
-      norms[ t * 3 + 1 ] = static_cast< GLdouble >( norm.y );
-      norms[ t * 3 + 2 ] = static_cast< GLdouble >( norm.z );
-      /*      std::cout << norm << std::endl; */
-    }
-  } else {
-    norms = nullptr;
-  }
-  boundings[ 0 ] = xs;
-  boundings[ 1 ] = ys;
-  boundings[ 2 ] = zs;
+  model = new StlModel( fileName );
 }
 
-GLfloat lightPos[] = { 0.0f, 0.0f, 500.0f, 10 };
-GLfloat specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-GLfloat specref[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-GLfloat ambientLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+GLfloat ambientLight[] = { 0.5f, 0.5f, 0.5f, 1.0f };
 
-void STLViewer::prepareShaderProgram() {
-  if (!mShaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex, ":shaders/phong.vert")) {
-    qCritical() << "error";
+void STLViewer::prepareShaderProgram( ) {
+  if( !mShaderProgram.addShaderFromSourceFile( QOpenGLShader::Vertex, ":shaders/phong.vert" ) ) {
+    qCritical( ) << "error";
   }
-  if (!mShaderProgram.addShaderFromSourceFile(QOpenGLShader::Fragment, ":shaders/phong.frag")) {
-    qCritical() << "error";
+  if( !mShaderProgram.addShaderFromSourceFile( QOpenGLShader::Fragment, ":shaders/phong.frag" ) ) {
+    qCritical( ) << "error";
   }
-  if (!mShaderProgram.link()) {
-    qCritical() << "error";
+  if( !mShaderProgram.link( ) ) {
+    qCritical( ) << "error";
   }
-  glCheckError();
+  glCheckError( );
 }
 
-void STLViewer::prepareVertexBuffers() {
+void STLViewer::prepareVertexBuffers( ) {
   float positionData[] = {
     -0.8f, -0.8f, 0.0f,
     0.8f, -0.8f, 0.0f,
-    0.0f,  0.8f, 0.0f
+    0.0f, 0.8f, 0.0f
   };
   float colorData[] = {
     1.0f, 0.0f, 0.0f,
@@ -112,169 +65,140 @@ void STLViewer::prepareVertexBuffers() {
     0.0f, 0.0f, 1.0f
   };
 
-  mVAO.create();
-  mVAO.bind();
+  mVAO.create( );
+  mVAO.bind( );
 
-  mVertexPositionBuffer.create();
-  mVertexPositionBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
-  mVertexPositionBuffer.bind();
-  mVertexPositionBuffer.allocate(positionData, 3 * 3 * sizeof(float));
+  mVertexPositionBuffer.create( );
+  mVertexPositionBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
+  mVertexPositionBuffer.bind( );
+  mVertexPositionBuffer.allocate( positionData, 3 * 3 * sizeof( float ) );
 
-  mVertexColorBuffer.create();
-  mVertexColorBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
-  mVertexColorBuffer.bind();
-  mVertexColorBuffer.allocate(colorData, 3 * 3 * sizeof(float));
+  mVertexColorBuffer.create( );
+  mVertexColorBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
+  mVertexColorBuffer.bind( );
+  mVertexColorBuffer.allocate( colorData, 3 * 3 * sizeof( float ) );
 
-  mShaderProgram.bind();
+  mShaderProgram.bind( );
 
-  mVertexPositionBuffer.bind();
-  mShaderProgram.enableAttributeArray("vertexPosition");
-  mShaderProgram.setAttributeBuffer("vertexPosition", GL_FLOAT, 0, 3);
+  mVertexPositionBuffer.bind( );
+  mShaderProgram.enableAttributeArray( "vertexPosition" );
+  mShaderProgram.setAttributeBuffer( "vertexPosition", GL_FLOAT, 0, 3 );
 
-  mVertexColorBuffer.bind();
-  mShaderProgram.enableAttributeArray("vertexColor");
-  mShaderProgram.setAttributeBuffer("vertexColor", GL_FLOAT, 0, 3);
-  glCheckError();
+  mVertexColorBuffer.bind( );
+  mShaderProgram.enableAttributeArray( "vertexColor" );
+  mShaderProgram.setAttributeBuffer( "vertexColor", GL_FLOAT, 0, 3 );
+  glCheckError( );
 }
 
 void STLViewer::initializeGL( ) {
+  prepareShaderProgram( );
 
-  prepareShaderProgram();
+  prepareVertexBuffers( );
 
-  prepareVertexBuffers();
+/*
+ *  glEnable( GL_LIGHTING );
+ *  glClearColor( 0, 0, 0, 1 );
+ *  glShadeModel( GL_SMOOTH );
+ *  glLightModelfv( GL_LIGHT_MODEL_AMBIENT, ambientLight );
+ *  glLightfv( GL_LIGHT0, GL_DIFFUSE, ambientLight );
+ *  glLightfv( GL_LIGHT0, GL_SPECULAR, specular );
+ *  glLightfv( GL_LIGHT0, GL_POSITION, lightPos );
+ *  glLightf( GL_LIGHT0, GL_SPOT_CUTOFF, 60.0f );
+ *  glEnable( GL_LIGHT0 );
+ */
 
-//  glEnable( GL_LIGHTING );
-//  glClearColor( 0, 0, 0, 1 );
-//  glShadeModel( GL_SMOOTH );
-//  glLightModelfv( GL_LIGHT_MODEL_AMBIENT, ambientLight );
-//  glLightfv( GL_LIGHT0, GL_DIFFUSE, ambientLight );
-//  glLightfv( GL_LIGHT0, GL_SPECULAR, specular );
-//  glLightfv( GL_LIGHT0, GL_POSITION, lightPos );
-//  glLightf( GL_LIGHT0, GL_SPOT_CUTOFF, 60.0f );
-//  glEnable( GL_LIGHT0 );
-
-//  glEnable( GL_DEPTH_TEST );
+/*  glEnable( GL_DEPTH_TEST ); */
 }
 
 void STLViewer::resizeGL( int w, int h ) {
-  glAssert( glViewport(0, 0, w, h) );
+  glAssert( glViewport( 0, 0, w, h ) );
 
+//  glViewport( 0, 0, w, h );
 //  glMatrixMode( GL_PROJECTION );
 //  glLoadIdentity( );
 //  gluPerspective( 60, ( float ) w / h, .01, 2.0 );
 //  glMatrixMode( GL_MODELVIEW );
 //  glLoadIdentity( );
-//  gluLookAt( 0, 0, -2, 0, 0, 0, 0, 1, 0 );
-//  if( verts ) {
-//    glVertexPointer( 3, GL_DOUBLE, 0, verts );
-//  }
-//  if( norms ) {
-//    glNormalPointer( GL_DOUBLE, 0, norms );
-//  }
+///*  gluLookAt( 0, 0, -2, 0, 0, 0, 0, 1, 0 ); */
+//  model->reload( );
+//  glCheckError( );
 }
 
 
 void STLViewer::paintGL( ) {
 
-  glAssert( glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT) );
+  glAssert( glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ) );
 
-  mShaderProgram.bind();
-  mVAO.bind();
+  mShaderProgram.bind( );
+  mVAO.bind( );
 
-//  QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-//  f->glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+  glAssert( glDrawArrays( GL_TRIANGLES, 0, 3 ) );
 
-//  glLoadIdentity( ); /* Set up modelview transform, first cube. */
-//  glPushMatrix( );
-//  glTranslated( 0, 0, -1.5 );
-//  glScaled( zoom, zoom, zoom );
-//  glRotatef( rotateZ, 0, 0, 1 ); /* Apply rotations. */
-//  glRotatef( rotateY, 0, 1, 0 );
-//  glRotatef( rotateX, 1, 0, 0 );
 
-  glAssert( glDrawArrays(GL_TRIANGLES, 0, 3) );
+//  /* Cleaning screen */
+//  glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+//  glClearColor( 0, 0, 0, 1 );
 
-//  glPushMatrix( );
+//  /* Loading modelView matrix */
+//  glMatrixMode( GL_MODELVIEW );
+//  glLoadIdentity( );
 
-//  glScaled( 1.0 / boundings[ 0 ], 1.0 / boundings[ 1 ], 1.0 / boundings[ 2 ] );
+//  Bial::Transform3D transf;
+//  transf.Translate( 0, 0, -1.5 ).Scale( zoom, zoom, zoom );
+//  transf.Rotate( rotateX, 0 ).Rotate( rotateY, 1 ).Rotate( rotateZ, 2 );
+//  glLoadMatrixd( &transf.getAffineMatrix( ).Transposed( )[ 0 ] );
 
-//  GLfloat red[] = { 0.2f, 0.2f, 0.2f, 1.f };
-//  glMaterialfv( GL_FRONT, GL_DIFFUSE, red );
-//  /*
-//   *  GLfloat blue[] = { 0.f, 0.f, 0.8f, 1.f };
-//   *  glMaterialfv( GL_BACK, GL_DIFFUSE, blue );
-//   */
+//  model->draw( );
 
-//  glTranslated( -boundings[ 0 ] / 2.0, -boundings[ 1 ] / 2.0, -boundings[ 2 ] / 2.0 );
-//  glEnableClientState( GL_VERTEX_ARRAY );
-//  glEnable( GL_POLYGON_OFFSET_FILL );
-//  glPolygonOffset( 1, 1 );
-//  if( tris ) {
-//    glDrawElements( GL_TRIANGLES, mesh->getNtris( ) * 3, GL_UNSIGNED_INT, tris );
-//  }
-//  glDisable( GL_POLYGON_OFFSET_FILL );
-//  glDisableClientState( GL_VERTEX_ARRAY );
+///*  light1.draw( ); */
 
-//  glPopMatrix( );
+///*  drawLines( ); */
 
-//  glBegin( GL_LINES );
-//  glColor3f( 1, 0, 0 );
-//  glVertex3d( 0, 0, 0 );
-//  glVertex3d( 1, 0, 0 );
-//  glColor3f( 0, 1, 0 );
-//  glVertex3d( 0, 0, 0 );
-//  glVertex3d( 0, 1, 0 );
-//  glColor3f( 0, 0, 1 );
-//  glVertex3d( 0, 0, 0 );
-//  glVertex3d( 0, 0, 1 );
-//  glEnd( );
+//  glCheckError( );
+}
 
-//  glPopMatrix( );
+void STLViewer::drawLines( ) {
+  glBegin( GL_LINES );
+  glColor3f( 1, 0, 0 );
+  glVertex3d( 0, 0, 0 );
+  glVertex3d( 1, 0, 0 );
+  glColor3f( 0, 1, 0 );
+  glVertex3d( 0, 0, 0 );
+  glVertex3d( 0, 1, 0 );
+  glColor3f( 0, 0, 1 );
+  glVertex3d( 0, 0, 0 );
+  glVertex3d( 0, 0, 1 );
+  glEnd( );
 }
 
 void STLViewer::clear( ) {
-  if( mesh ) {
-    delete mesh;
-  }
-  if( verts ) {
-    delete[] verts;
-  }
-  if( norms ) {
-    delete[] norms;
-  }
-  if( tris ) {
-    delete[] tris;
-  }
-  mesh = nullptr;
-  verts = nullptr;
-  norms = nullptr;
-  tris = nullptr;
+  delete model;
 }
 
 
 void STLViewer::keyPressEvent( QKeyEvent *evt ) {
   switch( evt->key( ) ) {
-  case Qt::Key_Left:
-    rotateY -= 15;
-    break;
-  case Qt::Key_Right:
-    rotateY += 15;
-    break;
-  case Qt::Key_Down:
-    rotateX -= 15;
-    break;
-  case Qt::Key_Up:
-    rotateX += 15;
-    break;
-  case Qt::Key_PageUp:
-    rotateZ -= 15;
-    break;
-  case Qt::Key_PageDown:
-    rotateZ += 15;
-    break;
-  case Qt::Key_Home:
-    resetTransform( );
-    break;
+      case Qt::Key_Left:
+      rotateY -= 15;
+      break;
+      case Qt::Key_Right:
+      rotateY += 15;
+      break;
+      case Qt::Key_Down:
+      rotateX -= 15;
+      break;
+      case Qt::Key_Up:
+      rotateX += 15;
+      break;
+      case Qt::Key_PageUp:
+      rotateZ -= 15;
+      break;
+      case Qt::Key_PageDown:
+      rotateZ += 15;
+      break;
+      case Qt::Key_Home:
+      resetTransform( );
+      break;
   }
   update( );
 }
