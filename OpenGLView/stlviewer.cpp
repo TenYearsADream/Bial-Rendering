@@ -13,6 +13,7 @@ STLViewer::STLViewer( QWidget *parent ) : QOpenGLWidget( parent ) {
 
   setFocus( );
   setFocusPolicy( Qt::StrongFocus );
+  model = nullptr;
 }
 
 void STLViewer::LoadFile( QString fileName ) {
@@ -75,7 +76,8 @@ void STLViewer::drawLines( ) {
 }
 
 void STLViewer::clear( ) {
-  delete model;
+  if(model)
+    delete model;
 }
 
 

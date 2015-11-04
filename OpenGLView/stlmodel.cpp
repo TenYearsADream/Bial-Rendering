@@ -47,9 +47,9 @@ StlModel::StlModel( QString fileName ) {
     norms = new GLdouble[ mesh->getNverts( ) * 3 ];
     for( size_t t = 0; t < mesh->getNverts( ); ++t ) {
       const Bial::Normal &norm = n[ t ];
-      norms[ t * 3 ] = 1.0 - static_cast< GLdouble >( norm.x );
-      norms[ t * 3 + 1 ] = 1.0 - static_cast< GLdouble >( norm.y );
-      norms[ t * 3 + 2 ] = 1.0 - static_cast< GLdouble >( norm.z );
+      norms[ t * 3 ] = 0.0 - static_cast< GLdouble >( norm.x );
+      norms[ t * 3 + 1 ] = 0.0 - static_cast< GLdouble >( norm.y );
+      norms[ t * 3 + 2 ] = 0.0 - static_cast< GLdouble >( norm.z );
       /*      std::cout << norm << std::endl; */
     }
   }
@@ -108,9 +108,29 @@ void StlModel::draw( ) {
   glPolygonOffset( 1, 1 );
   if( tris ) {
     glAssert( glDrawElements( GL_TRIANGLES, mesh->getNtris( ) * 3, GL_UNSIGNED_INT, tris ) );
+//    drawNormals( );
   }
   glDisable( GL_POLYGON_OFFSET_FILL );
   glDisableClientState( GL_VERTEX_ARRAY );
   glDisableClientState( GL_NORMAL_ARRAY );
   glPopMatrix( );
+}
+
+void StlModel::drawNormals( ) {
+  if( norms ) {
+    glBegin( GL_LINES );
+    glColor3f( 1, 0, 0 );
+    for( size_t i = 0; i < mesh->getNverts( ); ++i ) {
+      int x1 = verts[ i * 3 ];
+      int y1 = verts[ i * 3 + 1 ];
+      int z1 = verts[ i * 3 + 2 ];
+      int x2 = x1 + norms[ i * 3 ];
+      int y2 = y1 + norms[ i * 3 + 1 ];
+      int z2 = z1 + norms[ i * 3 + 2 ];
+      glVertex3f( x1, y1, z1 );
+      glVertex3f( x2, y2, z2 );
+
+    }
+    glEnd( );
+  }
 }

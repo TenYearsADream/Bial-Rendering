@@ -24,6 +24,7 @@ public:
   ~StlModel( );
   void reload( );
   void draw( );
+  void drawNormals( );
 };
 
 #endif /* STLMODEL_H */

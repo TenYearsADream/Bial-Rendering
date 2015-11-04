@@ -16,7 +16,7 @@ public:
   GLfloat lightDir[ 4 ] = { 0.0f, 0.0f, -1.0f, 10 };
   GLfloat specular[ 4 ] = { 1.0f, 1.0f, 1.0f, 1.0f };
   GLfloat specref[ 4 ] = { 1.0f, 1.0f, 1.0f, 1.0f };
-  GLfloat diffuse[ 4 ] = { 1.0f, 1.0f, 1.0f, 1.0f };
+  GLfloat diffuse[ 4 ] = { 0.4f, 0.4f, 0.4f, 1.0f };
   GLfloat ambient[ 4 ] = { 0.0f, 0.0f, 0.0f, 1.0f };
   double cutoff = 15.0f;
   void enable( ) {
