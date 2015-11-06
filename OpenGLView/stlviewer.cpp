@@ -16,11 +16,11 @@ STLViewer::STLViewer( QWidget *parent ) : QOpenGLWidget( parent ) {
   model = nullptr;
 }
 
-void STLViewer::LoadFile( QString fileName ) {
+void STLViewer::LoadFile( QString stlFile ) {
   clear( );
   resetTransform( );
-  model = new StlModel( fileName );
-
+/*  model = new StlModel( stlFile ); */
+  fileName = stlFile;
 }
 
 GLfloat ambientLight[] = { 0.5f, 0.5f, 0.5f, 1.0f };
@@ -56,7 +56,9 @@ void STLViewer::resizeGL( int w, int h ) {
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity( );
 /*  gluLookAt( 0, 0, -2, 0, 0, 0, 0, 1, 0 ); */
-  model->reload();
+  if( model ) {
+    model->reload( );
+  }
   glCheckError( );
 }
 
@@ -76,8 +78,9 @@ void STLViewer::drawLines( ) {
 }
 
 void STLViewer::clear( ) {
-  if(model)
+  if( model ) {
     delete model;
+  }
 }
 
 
@@ -175,12 +178,12 @@ void STLViewer::paintGL( ) {
   transf.Translate( 0, 0, -1.5 ).Scale( zoom, zoom, zoom );
   transf.Rotate( rotateX, 0 ).Rotate( rotateY, 1 ).Rotate( rotateZ, 2 );
   glLoadMatrixd( &transf.getAffineMatrix( ).Transposed( )[ 0 ] );
+  if( model ) {
+    model->draw( );
+  }
+/*  light1.draw( ); */
 
-  model->draw();
-
-//  light1.draw( );
-
-//  drawLines( );
+/*  drawLines( ); */
 
   glCheckError( );
 }

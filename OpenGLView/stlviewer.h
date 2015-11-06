@@ -24,16 +24,18 @@ public:
     glLightfv( lightNbr, GL_SPECULAR, specular );
     glLightfv( lightNbr, GL_POSITION, lightPos );
     glLightfv( lightNbr, GL_AMBIENT, ambient );
-//    glLightfv( lightNbr, GL_SPOT_DIRECTION, lightDir );
-//    glLightf( lightNbr, GL_SPOT_CUTOFF, cutoff );
-//    glLightf( lightNbr, GL_SPOT_EXPONENT, 1.0f );
+/*
+ *    glLightfv( lightNbr, GL_SPOT_DIRECTION, lightDir );
+ *    glLightf( lightNbr, GL_SPOT_CUTOFF, cutoff );
+ *    glLightf( lightNbr, GL_SPOT_EXPONENT, 1.0f );
+ */
     glEnable( lightNbr );
   }
   void draw( ) {
     glPushMatrix( );
-    glBegin(GL_POINTS);
-    glVertex3fv(lightPos);
-    glEnd();
+    glBegin( GL_POINTS );
+    glVertex3fv( lightPos );
+    glEnd( );
     glPopMatrix( );
   }
 };
@@ -47,7 +49,8 @@ class STLViewer : public QOpenGLWidget {
   int rotateZ = 0;
   bool dragging = false;
   QPoint lastPoint;
-  StlModel * model;
+  StlModel *model;
+  QString fileName;
 public:
   explicit STLViewer( QWidget *parent = 0 );
   void LoadFile( QString stlFile );
