@@ -22,6 +22,7 @@ protected:
   void keyPressEvent( QKeyEvent* );
 private slots:
   void on_actionOpen_files_triggered( );
+  void on_pushButton_clicked();
 };
 
 #endif /* MAINWINDOW_H */

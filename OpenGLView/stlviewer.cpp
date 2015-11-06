@@ -20,6 +20,9 @@ void STLViewer::LoadFile( QString stlFile ) {
   clear( );
   resetTransform( );
 /*  model = new StlModel( stlFile ); */
+  if( fileName.endsWith( ".stl" ) || fileName.endsWith( ".stl.gz" ) ) {
+    model = StlModel::loadStl( fileName );
+  }
   fileName = stlFile;
 }
 
@@ -164,6 +167,14 @@ void STLViewer::mouseDoubleClickEvent( QMouseEvent *evt ) {
   update( );
 }
 
+void STLViewer::runMarchingCubes( float isolevel, float scale ) {
+  if( model ) {
+    delete model;
+    model = nullptr;
+  }
+  model = StlModel::marchingCubes( fileName, isolevel, scale );
+  update();
+}
 
 void STLViewer::paintGL( ) {
   /* Cleaning screen */

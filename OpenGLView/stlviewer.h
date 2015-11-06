@@ -57,6 +57,7 @@ public:
 
   void drawLines( );
 
+  void runMarchingCubes( float isolevel, float scale );
 protected:
   void resetTransform( );
   void initializeGL( );

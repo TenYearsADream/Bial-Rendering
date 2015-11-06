@@ -4,17 +4,19 @@
 #include <QFileDialog>
 #include <QKeyEvent>
 #include <QMessageBox>
+#include <QProgressDialog>
 
 MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::MainWindow ) {
   ui->setupUi( this );
   QStringList args = QApplication::arguments( );
   if( args.size( ) == 2 ) {
-    QFileInfo info(args.at(1));
-    if(info.isFile()){
-      ui->openGLWidget->LoadFile( info.absoluteFilePath() );
-    }else{
-      QMessageBox::warning(this, "ERROR", "File not found.");
-      exit(1);
+    QFileInfo info( args.at( 1 ) );
+    if( info.isFile( ) ) {
+      ui->openGLWidget->LoadFile( info.absoluteFilePath( ) );
+    }
+    else {
+      QMessageBox::warning( this, "ERROR", "File not found." );
+      exit( 1 );
     }
   }
 }
@@ -36,6 +38,11 @@ void MainWindow::keyPressEvent( QKeyEvent *e ) {
 void MainWindow::on_actionOpen_files_triggered( ) {
   QString fileName =
     QFileDialog::getOpenFileName( this, "Open STL files.", QDir::homePath( ),
-                                  tr( "All Supported files (*.nii *.nii.gz *.stl *.stl.gz) ;;STL files (*.stl *.stl.gz);; NIfTI Images (*.nii *.nii.gz) ") );
+                                  tr(
+                                    "All Supported files (*.nii *.nii.gz *.stl *.stl.gz) ;;STL files (*.stl *.stl.gz);; NIfTI Images (*.nii *.nii.gz) " ) );
   ui->openGLWidget->LoadFile( fileName );
+}
+
+void MainWindow::on_pushButton_clicked( ) {
+  ui->openGLWidget->runMarchingCubes( ( double ) ui->spinBox->value( ), ui->doubleSpinBox->value( ) );
 }

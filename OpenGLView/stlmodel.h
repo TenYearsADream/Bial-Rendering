@@ -20,11 +20,14 @@ class StlModel {
   float boundings[ 3 ];
 
 public:
-  StlModel( QString fileName );
+  StlModel(Bial::TriangleMesh * mesh );
   ~StlModel( );
   void reload( );
   void draw( );
   void drawNormals( );
+
+  static StlModel * loadStl(QString fileName);
+  static StlModel * marchingCubes(QString fileName, float isolevel, float scale);
 };
 
 #endif /* STLMODEL_H */

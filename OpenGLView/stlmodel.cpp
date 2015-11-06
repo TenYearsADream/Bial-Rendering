@@ -3,25 +3,14 @@
 #include <QDebug>
 #include <QTime>
 
-StlModel::StlModel( QString fileName ) {
+StlModel::StlModel( Bial::TriangleMesh *mesh ) : mesh( mesh ) {
+  QTime t;
+  t.start( );
+
   mesh = nullptr;
   verts = nullptr;
   norms = nullptr;
   tris = nullptr;
-
-  COMMENT( "Loading stl file: " << fileName.toStdString( ), 0 );
-  if( fileName.endsWith( ".stl" ) || fileName.endsWith( ".stl.gz" ) ) {
-    mesh = Bial::TriangleMesh::ReadSTLB( fileName.trimmed( ).toStdString( ) );
-  }
-  else {
-    QTime t;
-    t.start( );
-    qDebug( ) << "Running marching cubes algorithm.";
-    Bial::Image< int > img = Bial::Geometrics::Scale( Bial::File::Read< int >( fileName.toStdString( ) ), 0.3, true );
-
-    mesh = Bial::MarchingCubes::exec( img, 50.f );
-    qDebug( ) << "Elapsed: " << t.elapsed( ) << " ms";
-  }
   /*    mesh->Print( std::cout ); */
   size_t *vertexIndex = mesh->getVertexIndex( );
   Bial::Point3D *p = mesh->getP( );
@@ -59,6 +48,7 @@ StlModel::StlModel( QString fileName ) {
   boundings[ 0 ] = xs;
   boundings[ 1 ] = ys;
   boundings[ 2 ] = zs;
+  qDebug( ) << "Elapsed: " << t.elapsed( ) << " ms";
 }
 
 StlModel::~StlModel( ) {
@@ -108,7 +98,7 @@ void StlModel::draw( ) {
   glPolygonOffset( 1, 1 );
   if( tris ) {
     glAssert( glDrawElements( GL_TRIANGLES, mesh->getNtris( ) * 3, GL_UNSIGNED_INT, tris ) );
-//    drawNormals( );
+/*    drawNormals( ); */
   }
   glDisable( GL_POLYGON_OFFSET_FILL );
   glDisableClientState( GL_VERTEX_ARRAY );
@@ -133,4 +123,24 @@ void StlModel::drawNormals( ) {
     }
     glEnd( );
   }
+}
+
+StlModel* StlModel::loadStl( QString fileName ) {
+  COMMENT( "Loading stl file: " << fileName.toStdString( ), 0 );
+  return( new StlModel( Bial::TriangleMesh::ReadSTLB( fileName.trimmed( ).toStdString( ) ) ) );
+
+}
+
+StlModel* StlModel::marchingCubes( QString fileName, float isolevel, float scale ) {
+  qDebug( ) << "Running marching cubes algorithm.";
+  Bial::Image< int > img = Bial::File::Read< int >( fileName.trimmed( ).toStdString( ) );
+  if( scale != 1.0 ) {
+    img = Bial::Geometrics::Scale( img, scale, true );
+  }
+  Bial::TriangleMesh *mesh = Bial::MarchingCubes::exec( img, isolevel );
+  if( !mesh ) {
+    return( nullptr );
+  }
+  return( new StlModel( mesh ) );
+
 }
