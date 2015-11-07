@@ -13,21 +13,21 @@
 
 
 class StlModel {
-  Bial::TriangleMesh *mesh;
-  GLdouble *verts;
-  GLdouble *norms;
-  GLuint *tris;
+  Bial::TriangleMesh *mesh = nullptr;
+  GLdouble *verts = nullptr;
+  GLdouble *norms = nullptr;
+  GLuint *tris = nullptr;
   float boundings[ 3 ];
 
 public:
-  StlModel(Bial::TriangleMesh * mesh );
+  StlModel( Bial::TriangleMesh *mesh );
   ~StlModel( );
   void reload( );
   void draw( );
   void drawNormals( );
 
-  static StlModel * loadStl(QString fileName);
-  static StlModel * marchingCubes(QString fileName, float isolevel, float scale);
+  static StlModel* loadStl( QString fileName );
+  static StlModel* marchingCubes( QString fileName, float isolevel, float scale );
 };
 
 #endif /* STLMODEL_H */

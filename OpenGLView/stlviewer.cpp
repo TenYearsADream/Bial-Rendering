@@ -9,6 +9,10 @@
 #include "stlviewer.h"
 
 
+StlModel* STLViewer::getModel( ) const {
+  return( model );
+}
+
 STLViewer::STLViewer( QWidget *parent ) : QOpenGLWidget( parent ) {
 
   setFocus( );
@@ -59,9 +63,6 @@ void STLViewer::resizeGL( int w, int h ) {
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity( );
 /*  gluLookAt( 0, 0, -2, 0, 0, 0, 0, 1, 0 ); */
-  if( model ) {
-    model->reload( );
-  }
   glCheckError( );
 }
 
@@ -151,14 +152,14 @@ void STLViewer::wheelEvent( QWheelEvent *evt ) {
     QPoint numSteps = numDegrees / 15;
     zoom += 0.1 * numSteps.ry( );
   }
-  zoom = std::max( 1.0, zoom );
+//  zoom = std::max( 1.0, zoom );
   evt->accept( );
   update( );
 }
 
 void STLViewer::resetTransform( ) {
   rotateX = rotateY = rotateZ = 0;
-  zoom = 1.0;
+  zoom = 0.0;
 }
 
 void STLViewer::mouseDoubleClickEvent( QMouseEvent *evt ) {
@@ -172,9 +173,9 @@ void STLViewer::runMarchingCubes( float isolevel, float scale ) {
     delete model;
     model = nullptr;
   }
-  model = StlModel::marchingCubes( fileName, isolevel, scale );
-  update();
-  emit finishedMCubes();
+  StlModel *mod = StlModel::marchingCubes( fileName, isolevel, scale );
+  model = mod;
+  update( );
 }
 
 void STLViewer::paintGL( ) {
@@ -187,7 +188,7 @@ void STLViewer::paintGL( ) {
   glLoadIdentity( );
 
   Bial::Transform3D transf;
-  transf.Translate( 0, 0, -1.5 ).Scale( zoom, zoom, zoom );
+  transf.Translate( 0, 0, -1.5 ).Translate(0,0,zoom);
   transf.Rotate( rotateX, 0 ).Rotate( rotateY, 1 ).Rotate( rotateZ, 2 );
   glLoadMatrixd( &transf.getAffineMatrix( ).Transposed( )[ 0 ] );
   if( model ) {

@@ -45,11 +45,7 @@ void MainWindow::on_actionOpen_files_triggered( ) {
 }
 
 void MainWindow::on_pushButton_clicked( ) {
-  QProgressDialog progress;
-  connect( ui->openGLWidget, &STLViewer::finishedMCubes, &progress, &QWidget::close );
-  std::thread thd( &STLViewer::runMarchingCubes, ui->openGLWidget,
-                   ( double ) ui->spinBox->value( ), ui->doubleSpinBox->value( ) );
-  progress.setRange( 0, 0 );
-  progress.exec( );
-
+//  QProgressDialog progress;
+//  connect( ui->openGLWidget, &STLViewer::finishedMCubes, &progress, &QWidget::close );
+  ui->openGLWidget->runMarchingCubes( ( double ) ui->spinBox->value( ), ui->doubleSpinBox->value( ) );
 }

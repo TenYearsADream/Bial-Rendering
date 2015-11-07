@@ -59,8 +59,10 @@ public:
 
   void runMarchingCubes( float isolevel, float scale );
 
+  StlModel* getModel( ) const;
+
 signals:
-  void finishedMCubes();
+  void finishedMCubes( );
 protected:
   void resetTransform( );
   void initializeGL( );
