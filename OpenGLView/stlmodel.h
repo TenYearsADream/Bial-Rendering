@@ -23,7 +23,7 @@ public:
   StlModel( Bial::TriangleMesh *mesh );
   ~StlModel( );
   void reload( );
-  void draw( );
+  void draw(bool drawNorm);
   void drawNormals( );
 
   static StlModel* loadStl( QString fileName );

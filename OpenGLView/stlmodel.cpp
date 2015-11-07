@@ -78,7 +78,7 @@ void StlModel::reload( ) {
 /*  qDebug( ) << "Loaded dada to OpenGL."; */
 }
 
-void StlModel::draw( ) {
+void StlModel::draw( bool drawNorm ) {
 /*  qDebug( ) << "Drawing Model"; */
   if( mesh ) {
     reload( );
@@ -101,7 +101,9 @@ void StlModel::draw( ) {
 /*    qDebug( ) << "Drawing Triangles."; */
     glAssert( glDrawElements( GL_TRIANGLES, mesh->getNtris( ) * 3, GL_UNSIGNED_INT, tris ) );
 /*    qDebug( ) << "Drawing Normals."; */
-/*    drawNormals( ); */
+    if( drawNorm ) {
+      drawNormals( );
+    }
   }
   glDisable( GL_POLYGON_OFFSET_FILL );
   glDisableClientState( GL_VERTEX_ARRAY );

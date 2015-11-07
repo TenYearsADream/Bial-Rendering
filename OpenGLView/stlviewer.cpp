@@ -13,6 +13,16 @@ StlModel* STLViewer::getModel( ) const {
   return( model );
 }
 
+
+bool STLViewer::getDrawNormals( ) const {
+  return( drawNormals );
+}
+
+void STLViewer::setDrawNormals( bool value ) {
+  drawNormals = value;
+  update( );
+}
+
 STLViewer::STLViewer( QWidget *parent ) : QOpenGLWidget( parent ) {
 
   setFocus( );
@@ -28,6 +38,7 @@ void STLViewer::LoadFile( QString stlFile ) {
     model = StlModel::loadStl( fileName );
   }
   fileName = stlFile;
+  update();
 }
 
 GLfloat ambientLight[] = { 0.5f, 0.5f, 0.5f, 1.0f };
@@ -152,7 +163,7 @@ void STLViewer::wheelEvent( QWheelEvent *evt ) {
     QPoint numSteps = numDegrees / 15;
     zoom += 0.1 * numSteps.ry( );
   }
-//  zoom = std::max( 1.0, zoom );
+/*  zoom = std::max( 1.0, zoom ); */
   evt->accept( );
   update( );
 }
@@ -188,11 +199,11 @@ void STLViewer::paintGL( ) {
   glLoadIdentity( );
 
   Bial::Transform3D transf;
-  transf.Translate( 0, 0, -1.5 ).Translate(0,0,zoom);
+  transf.Translate( 0, 0, -1.5 ).Translate( 0, 0, zoom );
   transf.Rotate( rotateX, 0 ).Rotate( rotateY, 1 ).Rotate( rotateZ, 2 );
   glLoadMatrixd( &transf.getAffineMatrix( ).Transposed( )[ 0 ] );
   if( model ) {
-    model->draw( );
+    model->draw( drawNormals );
   }
 /*  light1.draw( ); */
 

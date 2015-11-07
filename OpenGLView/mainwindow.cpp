@@ -45,7 +45,13 @@ void MainWindow::on_actionOpen_files_triggered( ) {
 }
 
 void MainWindow::on_pushButton_clicked( ) {
-//  QProgressDialog progress;
-//  connect( ui->openGLWidget, &STLViewer::finishedMCubes, &progress, &QWidget::close );
+/*
+ *  QProgressDialog progress;
+ *  connect( ui->openGLWidget, &STLViewer::finishedMCubes, &progress, &QWidget::close );
+ */
   ui->openGLWidget->runMarchingCubes( ( double ) ui->spinBox->value( ), ui->doubleSpinBox->value( ) );
+}
+
+void MainWindow::on_checkBox_clicked( bool checked ) {
+  ui->openGLWidget->setDrawNormals( checked );
 }

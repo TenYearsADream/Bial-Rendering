@@ -51,6 +51,8 @@ class STLViewer : public QOpenGLWidget {
   QPoint lastPoint;
   StlModel *model;
   QString fileName;
+  bool drawNormals;
+
 public:
   explicit STLViewer( QWidget *parent = 0 );
   void LoadFile( QString stlFile );
@@ -60,6 +62,9 @@ public:
   void runMarchingCubes( float isolevel, float scale );
 
   StlModel* getModel( ) const;
+
+  bool getDrawNormals( ) const;
+  void setDrawNormals( bool value );
 
 signals:
   void finishedMCubes( );
