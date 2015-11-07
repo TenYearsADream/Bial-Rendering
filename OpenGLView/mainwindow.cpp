@@ -5,6 +5,7 @@
 #include <QKeyEvent>
 #include <QMessageBox>
 #include <QProgressDialog>
+#include <QtConcurrent/QtConcurrent>
 
 MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::MainWindow ) {
   ui->setupUi( this );
@@ -44,5 +45,11 @@ void MainWindow::on_actionOpen_files_triggered( ) {
 }
 
 void MainWindow::on_pushButton_clicked( ) {
-  ui->openGLWidget->runMarchingCubes( ( double ) ui->spinBox->value( ), ui->doubleSpinBox->value( ) );
+  QProgressDialog progress;
+  connect( ui->openGLWidget, &STLViewer::finishedMCubes, &progress, &QWidget::close );
+  std::thread thd( &STLViewer::runMarchingCubes, ui->openGLWidget,
+                   ( double ) ui->spinBox->value( ), ui->doubleSpinBox->value( ) );
+  progress.setRange( 0, 0 );
+  progress.exec( );
+
 }

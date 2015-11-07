@@ -7,7 +7,6 @@ StlModel::StlModel( Bial::TriangleMesh *mesh ) : mesh( mesh ) {
   QTime t;
   t.start( );
 
-  mesh = nullptr;
   verts = nullptr;
   norms = nullptr;
   tris = nullptr;
@@ -98,7 +97,7 @@ void StlModel::draw( ) {
   glPolygonOffset( 1, 1 );
   if( tris ) {
     glAssert( glDrawElements( GL_TRIANGLES, mesh->getNtris( ) * 3, GL_UNSIGNED_INT, tris ) );
-/*    drawNormals( ); */
+    drawNormals( );
   }
   glDisable( GL_POLYGON_OFFSET_FILL );
   glDisableClientState( GL_VERTEX_ARRAY );
@@ -133,6 +132,9 @@ StlModel* StlModel::loadStl( QString fileName ) {
 
 StlModel* StlModel::marchingCubes( QString fileName, float isolevel, float scale ) {
   qDebug( ) << "Running marching cubes algorithm.";
+  if( fileName.isEmpty( ) ) {
+    return( nullptr );
+  }
   Bial::Image< int > img = Bial::File::Read< int >( fileName.trimmed( ).toStdString( ) );
   if( scale != 1.0 ) {
     img = Bial::Geometrics::Scale( img, scale, true );

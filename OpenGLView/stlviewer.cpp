@@ -174,6 +174,7 @@ void STLViewer::runMarchingCubes( float isolevel, float scale ) {
   }
   model = StlModel::marchingCubes( fileName, isolevel, scale );
   update();
+  emit finishedMCubes();
 }
 
 void STLViewer::paintGL( ) {
