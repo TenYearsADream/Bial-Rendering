@@ -147,7 +147,7 @@ StlModel* StlModel::marchingCubes( QString fileName, float isolevel, float scale
     img = Bial::Geometrics::Scale( img, scale, true );
   }
   qDebug( ) << "Running marching cubes algorithm.";
-  Bial::TriangleMesh *mesh = Bial::MarchingCubes::exec( img, isolevel );
+  Bial::TriangleMesh *mesh = Bial::MarchingCubes::exec( img, isolevel * img.Maximum( ) );
   if( !mesh ) {
     qDebug( ) << "Failed to generate model.";
     return( nullptr );

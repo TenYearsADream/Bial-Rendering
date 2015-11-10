@@ -49,9 +49,9 @@ class STLViewer : public QOpenGLWidget {
   int rotateZ = 0;
   bool dragging = false;
   QPoint lastPoint;
-  StlModel *model;
+  StlModel *model = nullptr;
   QString fileName;
-  bool drawNormals;
+  bool drawNormals = false;
 
 public:
   explicit STLViewer( QWidget *parent = 0 );

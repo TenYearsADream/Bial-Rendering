@@ -49,7 +49,7 @@ void MainWindow::on_pushButton_clicked( ) {
  *  QProgressDialog progress;
  *  connect( ui->openGLWidget, &STLViewer::finishedMCubes, &progress, &QWidget::close );
  */
-  ui->openGLWidget->runMarchingCubes( ( double ) ui->spinBox->value( ), ui->doubleSpinBox->value( ) );
+  ui->openGLWidget->runMarchingCubes( ui->doubleSpinBox_2->value( ), ui->doubleSpinBox->value( ) );
 }
 
 void MainWindow::on_checkBox_clicked( bool checked ) {
