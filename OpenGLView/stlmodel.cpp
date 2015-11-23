@@ -6,6 +6,33 @@
 
 using namespace Bial;
 
+bool comparePts( const Point3D &pt1, const Point3D &pt2 ) {
+  if( pt1.x != pt2.x ) {
+    return( pt1.x < pt2.x );
+  }
+  if( pt1.y != pt2.y ) {
+    return( pt1.y < pt2.y );
+  }
+  return( pt1.z < pt2.z );
+}
+
+template< typename T >
+Vector< std::size_t > sort_permutation( const Vector< T > &vec ) {
+  Vector< std::size_t > p( vec.size( ) );
+  std::iota( p.begin( ), p.end( ), 0 );
+  std::sort( p.begin( ), p.end( ),
+             [ & ]( std::size_t i, std::size_t j ) { return( comparePts( vec[ i ], vec[ j ] ) ); } );
+  return( p );
+}
+
+template< typename T >
+Vector< T > apply_permutation( const Vector< T > &vec, const Vector< std::size_t > &p ) {
+  Vector< T > sorted_vec( p.size( ) );
+  std::transform( p.begin( ), p.end( ), sorted_vec.begin( ),
+                  [ & ]( std::size_t i ) { return( vec[ i ] ); } );
+  return( sorted_vec );
+}
+
 StlModel::StlModel( TriangleMesh *mesh ) {
   this->mesh = mesh;
   simplifyMesh( mesh );
@@ -13,16 +40,33 @@ StlModel::StlModel( TriangleMesh *mesh ) {
   t.start( );
 
   /*    mesh->Print( std::cout ); */
-  const Vector<size_t> &vertexIndex = mesh->getVertexIndex( );
-  const Vector<Point3D> &p = mesh->getP( );
-  const Vector<Normal> &n = mesh->getN( );
-  verts.resize( mesh->getNverts( ) * 3 );
+/*  Vector< size_t > vertexIndex = mesh->getVertexIndex( ); */
+  Vector< size_t > vertexIndex = { 0, 1, 2, 3, 4, 5 };
+/*  Vector< Point3D > p = mesh->getP( ); */
+  Vector< Point3D > p = { Point3D( 0, 0, 1 ), Point3D( 0, 1, 0 ), Point3D( 1, 0, 0 ),
+                          Point3D( 1, 0, 1 ), Point3D( 1, 1, 0 ), Point3D( 0, 0, 0 ) };
+/*  Vector< Normal > n = mesh->getN( ); */
+  Vector< Normal > n( p.size( ) );
+  Vector< size_t > order = sort_permutation( p );
+  p = apply_permutation( p, order );
+  if( n.size( ) == p.size( ) ) {
+    n = apply_permutation( n, order );
+  }
+  for( size_t i = 0; i < vertexIndex.size( ); ++i ) {
+    vertexIndex[ i ] = order[ vertexIndex[ i ] ];
+  }
+  std::cout << "P = " << p << std::endl;
+  std::cout << "N = " << n << std::endl;
+  std::cout << "VI = " << vertexIndex << std::endl;
+//  std::cout << "order = " << order << std::endl;
+
+  verts.resize( p.size( ) * 3 );
   tris.resize( mesh->getNtris( ) * 3 );
-  for( size_t vtx = 0; vtx < ( mesh->getNtris( ) * 3 ); ++vtx ) {
+  for( size_t vtx = 0; vtx < vertexIndex.size( ); ++vtx ) {
     tris[ vtx ] = static_cast< GLuint >( vertexIndex[ vtx ] );
   }
   double xs( 0.0 ), ys( 0.0 ), zs( 0.0 );
-  for( size_t pt = 0; pt < mesh->getNverts( ); ++pt ) {
+  for( size_t pt = 0; pt < p.size( ); ++pt ) {
     const Point3D &point = p[ pt ];
     verts[ pt * 3 ] = static_cast< GLdouble >( point.x );
     verts[ pt * 3 + 1 ] = static_cast< GLdouble >( point.y );
@@ -32,10 +76,10 @@ StlModel::StlModel( TriangleMesh *mesh ) {
     ys = std::max( ys, point.y );
     zs = std::max( zs, point.z );
   }
-  if( !n.empty() ) {
+  if( !n.empty( ) ) {
     COMMENT( "Reading normals.", 0 );
-    norms.resize( mesh->getNverts( ) * 3 );
-    for( size_t t = 0; t < mesh->getNverts( ); ++t ) {
+    norms.resize( p.size( ) * 3 );
+    for( size_t t = 0; t < n.size( ); ++t ) {
       const Normal &norm = n[ t ];
       norms[ t * 3 ] = 0.0 - static_cast< GLdouble >( norm.x );
       norms[ t * 3 + 1 ] = 0.0 - static_cast< GLdouble >( norm.y );
@@ -69,6 +113,7 @@ void StlModel::reload( ) {
     glNormalPointer( GL_DOUBLE, 0, &norms[ 0 ] );
     glDisableClientState( GL_NORMAL_ARRAY );
   }
+
 /*  qDebug( ) << mesh->getNtris( ) << " triangles found"; */
 /*  qDebug( ) << "Loaded dada to OpenGL."; */
 }
@@ -92,9 +137,9 @@ void StlModel::draw( bool drawNorm ) {
   glEnableClientState( GL_VERTEX_ARRAY );
   glEnable( GL_POLYGON_OFFSET_FILL );
   glPolygonOffset( 1, 1 );
-  if( !tris.empty( ) && ( mesh->getNtris( ) > 0 ) ) {
+  if( !tris.empty( ) ) {
 /*    qDebug( ) << "Drawing Triangles."; */
-    glAssert( glDrawElements( GL_TRIANGLES, mesh->getNtris( ) * 3, GL_UNSIGNED_INT, &tris[ 0 ] ) );
+    glAssert( glDrawElements( GL_TRIANGLES, tris.size(), GL_UNSIGNED_INT, 0 ) );
 /*    qDebug( ) << "Drawing Normals."; */
     if( drawNorm ) {
       drawNormals( );
@@ -151,9 +196,9 @@ StlModel* StlModel::marchingCubes( QString fileName, float isolevel, float scale
 
 }
 
-#include <iostream>
 #include <algorithm>
+#include <iostream>
 
 void StlModel::simplifyMesh( TriangleMesh *mesh ) {
-//  std::vector<Point3D>points
+/*  std::vector<Point3D>points */
 }

@@ -33,11 +33,13 @@ STLViewer::STLViewer( QWidget *parent ) : QOpenGLWidget( parent ) {
 void STLViewer::LoadFile( QString stlFile ) {
   clear( );
   resetTransform( );
-/*  model = new StlModel( stlFile ); */
+
+  fileName = stlFile;
   if( fileName.endsWith( ".stl" ) || fileName.endsWith( ".stl.gz" ) ) {
     model = StlModel::loadStl( fileName );
+  }else{
+    runMarchingCubes(0.1,0.1);
   }
-  fileName = stlFile;
   update();
 }
 
