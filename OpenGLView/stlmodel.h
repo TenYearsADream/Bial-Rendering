@@ -8,26 +8,27 @@
 #include <GL/glu.h>
 #include <GL/glut.h>
 #include <QOpenGLWidget>
-
 #include <QString>
+#include <array>
 
 
 class StlModel {
   Bial::TriangleMesh *mesh = nullptr;
-  GLdouble *verts = nullptr;
-  GLdouble *norms = nullptr;
-  GLuint *tris = nullptr;
-  float boundings[ 3 ];
+  std::vector< GLdouble > verts;
+  std::vector< GLdouble > norms;
+  std::vector< GLuint > tris;
+  std::array< float, 3 > boundings;
 
 public:
   StlModel( Bial::TriangleMesh *mesh );
   ~StlModel( );
   void reload( );
-  void draw(bool drawNorm);
+  void draw( bool drawNorm );
   void drawNormals( );
 
   static StlModel* loadStl( QString fileName );
   static StlModel* marchingCubes( QString fileName, float isolevel, float scale );
+  void simplifyMesh(Bial::TriangleMesh * mesh);
 };
 
 #endif /* STLMODEL_H */

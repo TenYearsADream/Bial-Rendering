@@ -49,9 +49,8 @@ void TestMarchingCubes::testPolygonize( ) {
   Vector< Normal > normals;
   std::cout << "Tris = " << MarchingCubes::Polygonize( cell, 0.5, tris, vertices, normals ) << std::endl;
   std::shared_ptr< TriangleMesh > mesh( new TriangleMesh( new Transform3D( ), new Transform3D( ),
-                                                          false, tris.size( ) / 3,
-                                                          vertices.size( ), &tris[ 0 ], &vertices[ 0 ],
-                                                          &normals[ 0 ] ) );
+                                                          false, tris, vertices,
+                                                          normals ) );
 
   // mesh->Print(std::cout);
   // std::cout << std::endl << "STL: " << std::endl;
