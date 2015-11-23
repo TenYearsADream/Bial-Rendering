@@ -139,7 +139,7 @@ void StlModel::draw( bool drawNorm ) {
   glPolygonOffset( 1, 1 );
   if( !tris.empty( ) ) {
 /*    qDebug( ) << "Drawing Triangles."; */
-    glAssert( glDrawElements( GL_TRIANGLES, tris.size(), GL_UNSIGNED_INT, 0 ) );
+    glAssert( glDrawElements( GL_TRIANGLES, tris.size(), GL_UNSIGNED_INT, &tris[0] ) );
 /*    qDebug( ) << "Drawing Normals."; */
     if( drawNorm ) {
       drawNormals( );
