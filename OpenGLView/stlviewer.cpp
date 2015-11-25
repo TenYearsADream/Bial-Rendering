@@ -38,7 +38,7 @@ void STLViewer::LoadFile( QString stlFile ) {
   if( fileName.endsWith( ".stl" ) || fileName.endsWith( ".stl.gz" ) ) {
     model = StlModel::loadStl( fileName );
   }else{
-    runMarchingCubes(0.1,0.1);
+    runMarchingCubes(0.1,0.02);
   }
   update();
 }

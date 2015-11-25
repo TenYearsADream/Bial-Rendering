@@ -11,16 +11,17 @@
 #include <QString>
 #include <array>
 
+using namespace Bial;
 
 class StlModel {
-  Bial::TriangleMesh *mesh = nullptr;
-  Bial::Vector< GLdouble > verts;
-  Bial::Vector< GLdouble > norms;
-  Bial::Vector< GLuint > tris;
+  TriangleMesh *mesh = nullptr;
+  Vector< GLdouble > verts;
+  Vector< GLdouble > norms;
+  Vector< GLuint > tris;
   std::array< float, 3 > boundings;
 
 public:
-  StlModel( Bial::TriangleMesh *mesh );
+  StlModel( TriangleMesh *mesh );
   ~StlModel( );
   void reload( );
   void draw( bool drawNorm );
@@ -28,7 +29,10 @@ public:
 
   static StlModel* loadStl( QString fileName );
   static StlModel* marchingCubes( QString fileName, float isolevel, float scale );
-  void simplifyMesh(Bial::TriangleMesh * mesh);
+
+private:
+  void RemoveLittleComponents( Vector< size_t > &vertexIndex, size_t numVerts );
+  void SimplifyMesh( Vector< size_t > &vertexIndex, Vector< Normal > &n, Vector< Point3D > &p );
 };
 
 #endif /* STLMODEL_H */

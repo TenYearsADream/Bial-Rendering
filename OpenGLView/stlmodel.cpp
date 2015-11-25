@@ -1,8 +1,10 @@
+#include "Geometrics.hpp"
 #include "Sorting.hpp"
 #include "stlmodel.h"
 #include <QDebug>
 #include <QOpenGLContext>
 #include <QTime>
+#include <set>
 
 using namespace Bial;
 
@@ -33,31 +35,37 @@ Vector< T > apply_permutation( const Vector< T > &vec, const Vector< std::size_t
   return( sorted_vec );
 }
 
+void StlModel::RemoveLittleComponents(Vector< size_t > &vertexIndex, size_t numVerts) {
+  Vector< std::set< size_t > > accum( numVerts );
+
+  for( size_t tris = 0; tris < vertexIndex.size(); tris += 3){
+    auto it = vertexIndex.begin() + tris;
+    accum[*(it)].insert(it, it + 3);
+  }
+
+}
+
 StlModel::StlModel( TriangleMesh *mesh ) {
   this->mesh = mesh;
-  simplifyMesh( mesh );
   QTime t;
   t.start( );
 
   /*    mesh->Print( std::cout ); */
-
+  /* Exportando dados da mesh. */
   Vector< Point3D > p = mesh->getP( );
   Vector< size_t > vertexIndex = mesh->getVertexIndex( );
   Vector< Normal > n = mesh->getN( );
+  int nverts = p.size( );
+  /* Simplifica a mesh, removendo as duplicatas. */
+  SimplifyMesh( vertexIndex, n, p );
 
-  Vector< size_t > order = sort_permutation( p );
-  p = apply_permutation( p, order );
-  if( n.size( ) == p.size( ) ) {
-    n = apply_permutation( n, order );
-  }
-  Vector< size_t > invOrder( order.size( ) );
-  for( size_t i = 0; i < order.size( ); ++i ) {
-    invOrder[ order[ i ] ] = i;
-  }
-  tris = Vector< GLuint >( vertexIndex.size( ) );
-  for( size_t vtx = 0; vtx < vertexIndex.size( ); ++vtx ) {
-    tris[ vtx ] = invOrder[ vertexIndex[ vtx ] ];
-  }
+  RemoveLittleComponents( vertexIndex, p.size() );
+  tris = Vector< GLuint >( vertexIndex );
+  qDebug( ) << "SimplifyMesh reduced the number of vertices from " << nverts
+            << " to " << p.size( )
+            << " (" << ( p.size( ) * 100.0 ) / ( ( double ) nverts ) << "%)";
+
+
   verts.resize( p.size( ) * 3 );
   double xs( 0.0 ), ys( 0.0 ), zs( 0.0 );
   for( size_t i = 0; i < p.size( ); ++i ) {
@@ -146,7 +154,7 @@ void StlModel::drawNormals( ) {
   if( !norms.empty( ) ) {
     glBegin( GL_LINES );
     glColor3f( 1, 0, 0 );
-    for( size_t i = 0; i < mesh->getNverts( ); ++i ) {
+    for( size_t i = 0; i < norms.size( ) / 3; ++i ) {
       int x1 = verts[ i * 3 ];
       int y1 = verts[ i * 3 + 1 ];
       int z1 = verts[ i * 3 + 2 ];
@@ -187,9 +195,47 @@ StlModel* StlModel::marchingCubes( QString fileName, float isolevel, float scale
 
 }
 
-#include <algorithm>
-#include <iostream>
-
-void StlModel::simplifyMesh( TriangleMesh *mesh ) {
-/*  std::vector<Point3D>points */
+void StlModel::SimplifyMesh( Vector< size_t > &vertexIndex, Vector< Normal > &n, Vector< Point3D > &p ) {
+  Vector< size_t > order = sort_permutation( p );
+  /* Aplicando ordenação sobre p e n */
+  p = apply_permutation( p, order );
+  if( n.size( ) == p.size( ) ) {
+    n = apply_permutation( n, order );
+  }
+  /* Criando o vetor de ordenação inverso */
+  Vector< size_t > invOrder( order.size( ) );
+  for( size_t i = 0; i < order.size( ); ++i ) {
+    invOrder[ order[ i ] ] = i;
+  }
+  /* Reatribuindo os indices. */
+  Vector< size_t > vi2( vertexIndex.size( ) );
+  for( size_t vtx = 0; vtx < vertexIndex.size( ); ++vtx ) {
+    vi2[ vtx ] = invOrder[ vertexIndex[ vtx ] ];
+  }
+  Vector< Point3D > p2;
+  Vector< Normal > n2;
+  p2.reserve( p.size( ) );
+  n2.reserve( n.size( ) );
+  order = Vector< size_t >( p.size( ) );
+  order[ 0 ] = 0;
+  p2.push_back( p.front( ) );
+  n2.push_back( n.front( ) );
+  /* Removendo duplicatas */
+  for( size_t i = 1; i < p.size( ); ++i ) {
+    if( Distance( p[ i - 1 ], p[ i ] ) < 0.001 ) {
+      order[ i ] = order[ i - 1 ];
+    }
+    else {
+      order[ i ] = p2.size( );
+      p2.push_back( p[ i ] );
+      n2.push_back( n[ i ] );
+    }
+  }
+  p2.swap( p );
+  n2.swap( n );
+  /* Reatribuindo os indices novamente. */
+  for( size_t vtx = 0; vtx < vi2.size( ); ++vtx ) {
+    vi2[ vtx ] = order[ vi2[ vtx ] ];
+  }
+  vi2.swap( vertexIndex );
 }
