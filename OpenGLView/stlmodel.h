@@ -14,9 +14,9 @@
 
 class StlModel {
   Bial::TriangleMesh *mesh = nullptr;
-  std::vector< GLdouble > verts;
-  std::vector< GLdouble > norms;
-  std::vector< GLuint > tris;
+  Bial::Vector< GLdouble > verts;
+  Bial::Vector< GLdouble > norms;
+  Bial::Vector< GLuint > tris;
   std::array< float, 3 > boundings;
 
 public:

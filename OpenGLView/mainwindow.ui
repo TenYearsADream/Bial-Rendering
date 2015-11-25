@@ -29,7 +29,7 @@
      <x>0</x>
      <y>0</y>
      <width>676</width>
-     <height>19</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuOpen_file">
@@ -65,7 +65,7 @@
         <double>0.100000000000000</double>
        </property>
        <property name="value">
-        <double>1.000000000000000</double>
+        <double>0.100000000000000</double>
        </property>
       </widget>
      </item>

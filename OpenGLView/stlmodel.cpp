@@ -40,38 +40,31 @@ StlModel::StlModel( TriangleMesh *mesh ) {
   t.start( );
 
   /*    mesh->Print( std::cout ); */
-/*  Vector< size_t > vertexIndex = mesh->getVertexIndex( ); */
-  Vector< size_t > vertexIndex = { 0, 1, 2, 3, 4, 5 };
-/*  Vector< Point3D > p = mesh->getP( ); */
-  Vector< Point3D > p = { Point3D( 0, 0, 1 ), Point3D( 0, 1, 0 ), Point3D( 1, 0, 0 ),
-                          Point3D( 1, 0, 1 ), Point3D( 1, 1, 0 ), Point3D( 0, 0, 0 ) };
-/*  Vector< Normal > n = mesh->getN( ); */
-  Vector< Normal > n( p.size( ) );
+
+  Vector< Point3D > p = mesh->getP( );
+  Vector< size_t > vertexIndex = mesh->getVertexIndex( );
+  Vector< Normal > n = mesh->getN( );
+
   Vector< size_t > order = sort_permutation( p );
   p = apply_permutation( p, order );
   if( n.size( ) == p.size( ) ) {
     n = apply_permutation( n, order );
   }
-  for( size_t i = 0; i < vertexIndex.size( ); ++i ) {
-    vertexIndex[ i ] = order[ vertexIndex[ i ] ];
+  Vector< size_t > invOrder( order.size( ) );
+  for( size_t i = 0; i < order.size( ); ++i ) {
+    invOrder[ order[ i ] ] = i;
   }
-  std::cout << "P = " << p << std::endl;
-  std::cout << "N = " << n << std::endl;
-  std::cout << "VI = " << vertexIndex << std::endl;
-//  std::cout << "order = " << order << std::endl;
-
-  verts.resize( p.size( ) * 3 );
-  tris.resize( mesh->getNtris( ) * 3 );
+  tris = Vector< GLuint >( vertexIndex.size( ) );
   for( size_t vtx = 0; vtx < vertexIndex.size( ); ++vtx ) {
-    tris[ vtx ] = static_cast< GLuint >( vertexIndex[ vtx ] );
+    tris[ vtx ] = invOrder[ vertexIndex[ vtx ] ];
   }
+  verts.resize( p.size( ) * 3 );
   double xs( 0.0 ), ys( 0.0 ), zs( 0.0 );
-  for( size_t pt = 0; pt < p.size( ); ++pt ) {
-    const Point3D &point = p[ pt ];
-    verts[ pt * 3 ] = static_cast< GLdouble >( point.x );
-    verts[ pt * 3 + 1 ] = static_cast< GLdouble >( point.y );
-    verts[ pt * 3 + 2 ] = static_cast< GLdouble >( point.z );
-
+  for( size_t i = 0; i < p.size( ); ++i ) {
+    const Point3D &point = p[ i ];
+    verts[ i * 3 ] = static_cast< GLdouble >( point.x );
+    verts[ i * 3 + 1 ] = static_cast< GLdouble >( point.y );
+    verts[ i * 3 + 2 ] = static_cast< GLdouble >( point.z );
     xs = std::max( xs, point.x );
     ys = std::max( ys, point.y );
     zs = std::max( zs, point.z );
@@ -79,12 +72,11 @@ StlModel::StlModel( TriangleMesh *mesh ) {
   if( !n.empty( ) ) {
     COMMENT( "Reading normals.", 0 );
     norms.resize( p.size( ) * 3 );
-    for( size_t t = 0; t < n.size( ); ++t ) {
-      const Normal &norm = n[ t ];
-      norms[ t * 3 ] = 0.0 - static_cast< GLdouble >( norm.x );
-      norms[ t * 3 + 1 ] = 0.0 - static_cast< GLdouble >( norm.y );
-      norms[ t * 3 + 2 ] = 0.0 - static_cast< GLdouble >( norm.z );
-      /*      std::cout << norm << std::endl; */
+    for( size_t i = 0; i < n.size( ); ++i ) {
+      const Normal &norm = n[ i ];
+      norms[ i * 3 ] = 0.0 - static_cast< GLdouble >( norm.x );
+      norms[ i * 3 + 1 ] = 0.0 - static_cast< GLdouble >( norm.y );
+      norms[ i * 3 + 2 ] = 0.0 - static_cast< GLdouble >( norm.z );
     }
   }
   boundings[ 0 ] = xs;
@@ -113,7 +105,6 @@ void StlModel::reload( ) {
     glNormalPointer( GL_DOUBLE, 0, &norms[ 0 ] );
     glDisableClientState( GL_NORMAL_ARRAY );
   }
-
 /*  qDebug( ) << mesh->getNtris( ) << " triangles found"; */
 /*  qDebug( ) << "Loaded dada to OpenGL."; */
 }
@@ -139,7 +130,7 @@ void StlModel::draw( bool drawNorm ) {
   glPolygonOffset( 1, 1 );
   if( !tris.empty( ) ) {
 /*    qDebug( ) << "Drawing Triangles."; */
-    glAssert( glDrawElements( GL_TRIANGLES, tris.size(), GL_UNSIGNED_INT, &tris[0] ) );
+    glAssert( glDrawElements( GL_TRIANGLES, tris.size( ), GL_UNSIGNED_INT, &tris[ 0 ] ) );
 /*    qDebug( ) << "Drawing Normals."; */
     if( drawNorm ) {
       drawNormals( );
