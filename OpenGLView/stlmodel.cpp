@@ -35,14 +35,46 @@ Vector< T > apply_permutation( const Vector< T > &vec, const Vector< std::size_t
   return( sorted_vec );
 }
 
-void StlModel::RemoveLittleComponents(Vector< size_t > &vertexIndex, size_t numVerts) {
-  Vector< std::set< size_t > > accum( numVerts );
-
-  for( size_t tris = 0; tris < vertexIndex.size(); tris += 3){
-    auto it = vertexIndex.begin() + tris;
-    accum[*(it)].insert(it, it + 3);
+void searchTriangles( size_t vtx,
+                      Vector< size_t > &vertexIndex,
+                      Vector< std::set< size_t > > &accum,
+                      Vector< bool > &visited ) {
+  for( auto it = accum[ vtx ].begin( ); it != accum[ vtx ].end( ); ++it ) {
+    for( size_t v = 0; v < 3; ++v ) {
+      size_t vtx2 = vertexIndex[ *it * 3 + v ];
+      if( !visited[ vtx2 ] ) {
+        visited[ vtx2 ] = true;
+        searchTriangles( vtx2, vertexIndex, accum, visited );
+        accum[ vtx ].insert( accum[ vtx2 ].begin( ), accum[ vtx2 ].end( ) );
+      }
+    }
   }
+}
 
+void StlModel::RemoveLittleComponents( Vector< size_t > &vertexIndex, size_t numVerts ) {
+  Vector< std::set< size_t > > accum( numVerts );
+  Vector< bool > visited( numVerts, false );
+  for( size_t tris = 0; tris < vertexIndex.size( ); tris++ ) {
+    accum[ vertexIndex[ tris ] ].insert( tris / 3 );
+  }
+  for( size_t vtx = 0; vtx < accum.size( ); vtx++ ) {
+    visited[ vtx ] = true;
+    searchTriangles( vtx, vertexIndex, accum, visited );
+  }
+  size_t best = 0;
+  for( size_t vtx = 1; vtx < accum.size( ); vtx++ ) {
+    if( accum[ vtx ].size( ) > accum[ best ].size( ) ) {
+      best = vtx;
+    }
+  }
+  Vector< size_t > vi( accum[ best ].size( ) * 3 );
+  size_t top = 0;
+  for( auto it = accum[ best ].begin( ); it != accum[ best ].end( ); ++it ) {
+    vi[ top++ ] = vertexIndex[ ( *it ) * 3 ];
+    vi[ top++ ] = vertexIndex[ ( *it ) * 3 + 1 ];
+    vi[ top++ ] = vertexIndex[ ( *it ) * 3 + 2 ];
+  }
+  vi.swap(vertexIndex);
 }
 
 StlModel::StlModel( TriangleMesh *mesh ) {
@@ -58,13 +90,13 @@ StlModel::StlModel( TriangleMesh *mesh ) {
   int nverts = p.size( );
   /* Simplifica a mesh, removendo as duplicatas. */
   SimplifyMesh( vertexIndex, n, p );
-
-  RemoveLittleComponents( vertexIndex, p.size() );
-  tris = Vector< GLuint >( vertexIndex );
   qDebug( ) << "SimplifyMesh reduced the number of vertices from " << nverts
             << " to " << p.size( )
             << " (" << ( p.size( ) * 100.0 ) / ( ( double ) nverts ) << "%)";
 
+  RemoveLittleComponents( vertexIndex, p.size( ) );
+  tris = Vector< GLuint >( vertexIndex );
+  qDebug( ) << "the biggest component has " << vertexIndex.size( ) << " elements.";
 
   verts.resize( p.size( ) * 3 );
   double xs( 0.0 ), ys( 0.0 ), zs( 0.0 );
