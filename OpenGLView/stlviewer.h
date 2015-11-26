@@ -50,12 +50,12 @@ class STLViewer : public QOpenGLWidget {
   bool dragging = false;
   QPoint lastPoint;
   StlModel *model = nullptr;
-  QString fileName;
+  QString fileName, maskFileName;
   bool drawNormals = false;
 
 public:
   explicit STLViewer( QWidget *parent = 0 );
-  void LoadFile( QString stlFile );
+  void LoadFile( QString stlFile, QString mask = QString() );
 
   void drawLines( );
 

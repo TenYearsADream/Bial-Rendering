@@ -46,6 +46,7 @@ void searchTriangles( size_t vtx,
         visited[ vtx2 ] = true;
         searchTriangles( vtx2, vertexIndex, accum, visited );
         accum[ vtx ].insert( accum[ vtx2 ].begin( ), accum[ vtx2 ].end( ) );
+        accum[ vtx2 ].clear( );
       }
     }
   }
@@ -57,13 +58,15 @@ void StlModel::RemoveLittleComponents( Vector< size_t > &vertexIndex, size_t num
   for( size_t tris = 0; tris < vertexIndex.size( ); tris++ ) {
     accum[ vertexIndex[ tris ] ].insert( tris / 3 );
   }
+  size_t best = 0;
   for( size_t vtx = 0; vtx < accum.size( ); vtx++ ) {
     visited[ vtx ] = true;
     searchTriangles( vtx, vertexIndex, accum, visited );
-  }
-  size_t best = 0;
-  for( size_t vtx = 1; vtx < accum.size( ); vtx++ ) {
-    if( accum[ vtx ].size( ) > accum[ best ].size( ) ) {
+    if( accum[ vtx ].size( ) >= vertexIndex.size( ) / 2 ) {
+      best = vtx;
+      break;
+    }
+    else if( accum[ vtx ].size( ) > accum[ best ].size( ) ) {
       best = vtx;
     }
   }
@@ -74,29 +77,35 @@ void StlModel::RemoveLittleComponents( Vector< size_t > &vertexIndex, size_t num
     vi[ top++ ] = vertexIndex[ ( *it ) * 3 + 1 ];
     vi[ top++ ] = vertexIndex[ ( *it ) * 3 + 2 ];
   }
-  vi.swap(vertexIndex);
+  vi.swap( vertexIndex );
 }
 
-StlModel::StlModel( TriangleMesh *mesh ) {
-  this->mesh = mesh;
+StlModel::StlModel( TriangleMesh *amesh ) {
   QTime t;
   t.start( );
-
+  mesh = amesh;
   /*    mesh->Print( std::cout ); */
   /* Exportando dados da mesh. */
   Vector< Point3D > p = mesh->getP( );
   Vector< size_t > vertexIndex = mesh->getVertexIndex( );
   Vector< Normal > n = mesh->getN( );
+  delete mesh;
   int nverts = p.size( );
   /* Simplifica a mesh, removendo as duplicatas. */
   SimplifyMesh( vertexIndex, n, p );
+  qDebug( ) << "The 3D mesh has" << vertexIndex.size( ) / 3 << "triangles.";
   qDebug( ) << "SimplifyMesh reduced the number of vertices from " << nverts
             << " to " << p.size( )
             << " (" << ( p.size( ) * 100.0 ) / ( ( double ) nverts ) << "%)";
+  qDebug( ) << "Elapsed (SimplifyMesh):" << t.elapsed( ) << "ms";
+  t.start( );
+/*
+ *  RemoveLittleComponents( vertexIndex, p.size( ) );
+ *  qDebug( ) << "Elapsed (RemoveLittleComponents):" << t.elapsed( ) << "ms";
+ */
 
-  RemoveLittleComponents( vertexIndex, p.size( ) );
   tris = Vector< GLuint >( vertexIndex );
-  qDebug( ) << "the biggest component has " << vertexIndex.size( ) << " elements.";
+  qDebug( ) << "The biggest component has" << vertexIndex.size( ) / 3 << "triangles.";
 
   verts.resize( p.size( ) * 3 );
   double xs( 0.0 ), ys( 0.0 ), zs( 0.0 );
@@ -122,8 +131,8 @@ StlModel::StlModel( TriangleMesh *mesh ) {
   boundings[ 0 ] = xs;
   boundings[ 1 ] = ys;
   boundings[ 2 ] = zs;
-
-  qDebug( ) << "Elapsed: " << t.elapsed( ) << " ms";
+  this->mesh = new TriangleMesh( new Transform3D( ), new Transform3D( ),
+                                 false, vertexIndex, p, n );
 }
 
 StlModel::~StlModel( ) {
@@ -201,12 +210,16 @@ void StlModel::drawNormals( ) {
   }
 }
 
+void StlModel::save( QString fileName ) {
+  mesh->ExportSTLB( fileName.toStdString( ) );
+}
+
 StlModel* StlModel::loadStl( QString fileName ) {
   COMMENT( "Loading stl file: " << fileName.toStdString( ), 0 );
   return( new StlModel( TriangleMesh::ReadSTLB( fileName.trimmed( ).toStdString( ) ) ) );
 }
 
-StlModel* StlModel::marchingCubes( QString fileName, float isolevel, float scale ) {
+StlModel* StlModel::marchingCubes( QString fileName, QString maskFileName, float isolevel, float scale ) {
   if( fileName.isEmpty( ) ) {
     return( nullptr );
   }
@@ -217,7 +230,18 @@ StlModel* StlModel::marchingCubes( QString fileName, float isolevel, float scale
     img = Geometrics::Scale( img, scale, true );
   }
   qDebug( ) << "Running marching cubes algorithm.";
-  TriangleMesh *mesh = MarchingCubes::exec( img, isolevel * img.Maximum( ) );
+  TriangleMesh *mesh;
+  if( maskFileName.isEmpty( ) ) {
+    mesh = MarchingCubes::exec( img, isolevel * img.Maximum( ) );
+  }
+  else {
+    qDebug( ) << "Binary marching cubes algorithm.";
+    Image< int > img2 = File::Read< int >( fileName.trimmed( ).toStdString( ) );
+    if( scale != 1.0 ) {
+      img2 = Geometrics::Scale( img2, scale, true );
+    }
+    mesh = MarchingCubes::Binary( img, img2, isolevel * img.Maximum( ) );
+  }
   if( !mesh ) {
     qDebug( ) << "Failed to generate model.";
     return( nullptr );

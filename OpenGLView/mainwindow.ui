@@ -37,6 +37,7 @@
      <string>File</string>
     </property>
     <addaction name="actionOpen_files"/>
+    <addaction name="actionExport_stl"/>
    </widget>
    <addaction name="menuOpen_file"/>
   </widget>
@@ -125,6 +126,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionExport_stl">
+   <property name="text">
+    <string>Export .stl</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
    </property>
   </action>
  </widget>

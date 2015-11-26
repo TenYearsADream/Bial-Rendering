@@ -24,6 +24,7 @@ private slots:
   void on_actionOpen_files_triggered( );
   void on_pushButton_clicked( );
   void on_checkBox_clicked( bool checked );
+  void on_actionExport_stl_triggered();
 };
 
 #endif /* MAINWINDOW_H */

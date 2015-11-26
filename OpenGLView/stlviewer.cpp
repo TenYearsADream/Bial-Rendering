@@ -30,17 +30,19 @@ STLViewer::STLViewer( QWidget *parent ) : QOpenGLWidget( parent ) {
   model = nullptr;
 }
 
-void STLViewer::LoadFile( QString stlFile ) {
+void STLViewer::LoadFile( QString stlFile, QString mask ) {
   clear( );
   resetTransform( );
 
   fileName = stlFile;
+  maskFileName = mask;
   if( fileName.endsWith( ".stl" ) || fileName.endsWith( ".stl.gz" ) ) {
     model = StlModel::loadStl( fileName );
-  }else{
-    runMarchingCubes(0.1,0.05);
   }
-  update();
+  else {
+    runMarchingCubes( 0.1, 0.05 );
+  }
+  update( );
 }
 
 GLfloat ambientLight[] = { 0.5f, 0.5f, 0.5f, 1.0f };
@@ -186,7 +188,7 @@ void STLViewer::runMarchingCubes( float isolevel, float scale ) {
     delete model;
     model = nullptr;
   }
-  StlModel *mod = StlModel::marchingCubes( fileName, isolevel, scale );
+  StlModel *mod = StlModel::marchingCubes( fileName, maskFileName, isolevel, scale );
   model = mod;
   update( );
 }

@@ -20,6 +20,17 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ), ui( new Ui::M
       exit( 1 );
     }
   }
+  else if( args.size( ) == 3 ) {
+    QFileInfo info( args.at( 1 ) );
+    QFileInfo info2( args.at( 2 ) );
+    if( info.isFile( ) && info2.isFile( ) ) {
+      ui->openGLWidget->LoadFile( info.absoluteFilePath( ), info2.absoluteFilePath( ) );
+    }
+    else {
+      QMessageBox::warning( this, "ERROR", "File not found." );
+      exit( 1 );
+    }
+  }
 }
 
 MainWindow::~MainWindow( ) {
@@ -54,4 +65,13 @@ void MainWindow::on_pushButton_clicked( ) {
 
 void MainWindow::on_checkBox_clicked( bool checked ) {
   ui->openGLWidget->setDrawNormals( checked );
+}
+
+void MainWindow::on_actionExport_stl_triggered( ) {
+  if( ui->openGLWidget->getModel( ) ) {
+    QString fileName =
+      QFileDialog::getSaveFileName( this, "Export STL file", QDir::homePath( ),
+                                    tr( "STL files (*.stl *.stl.gz);;" ) );
+    ui->openGLWidget->getModel( )->save( fileName );
+  }
 }

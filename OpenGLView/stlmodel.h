@@ -21,14 +21,14 @@ class StlModel {
   std::array< float, 3 > boundings;
 
 public:
-  StlModel( TriangleMesh *mesh );
+  StlModel(TriangleMesh *amesh );
   ~StlModel( );
   void reload( );
   void draw( bool drawNorm );
   void drawNormals( );
-
+  void save(QString fileName);
   static StlModel* loadStl( QString fileName );
-  static StlModel* marchingCubes( QString fileName, float isolevel, float scale );
+  static StlModel* marchingCubes(QString fileName, QString maskFileName, float isolevel, float scale );
 
 private:
   void RemoveLittleComponents( Vector< size_t > &vertexIndex, size_t numVerts );
